@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Favorit";
+    src: url(./assets/fonts/Favorit.woff2), format("woff2");
+}
+
+@font-face {
+    font-family: "Favorit Mono";
+    src: url(./assets/fonts/FavoritMono.woff2), format("woff2");
+}
+
+@theme {
+    --background: #ffffff;
+    --foreground: #0a0a0a;
+    --font-sans: "Favorit", sans-serif;
+    --font-mono: "Favorit Mono", monospace;
+}
+
+@layer utilities {
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        cursor: pointer;
+        border-radius: 9999px;
+        background-color: #303030;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        border-radius: 18px;
+        background-color: #181818;
+    }
+
+    @media screen and (max-width: 40rem) {
+        .custom-scrollbar {
+            -ms-overflow-style: none;
+            /* IE y Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari y Opera */
+        }
+    }
+
+    @media screen and (max-width: 96rem) {
+        .custom-scrollbar {
+            -ms-overflow-style: none;
+            /* IE y Edge */
+            scrollbar-width: 0;
+            /* Firefox */
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            display: flex;
+            height: 8px;
+            /* Chrome, Safari y Opera */
+        }
+    }
+}
+
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
+}
+
+body {
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    background-color: var(--background);
+}
+
+#root {
+    width: 100%;
+}
