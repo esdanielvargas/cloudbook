@@ -27,6 +27,7 @@ import { db, usePosts, useUsers } from "../hooks";
 import {
   ArrowPathRoundedSquareIcon,
   BookmarkIcon,
+  HeartIcon,
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import { abbrNumber, cleanUrlParams, copyProfileLink } from "../utils";
@@ -47,8 +48,13 @@ export default function Profile() {
   // Información del perfil
   const user = users.find((user) => user?.username === username);
 
-  // Información del usuario actual o logeado
-  const currentUser = users.find((user) => user?.uid === auth.currentUser?.uid);
+  // Información del usuario logeado
+  const currentUser = users.find(
+    (user) => user?.uid === auth?.currentUser?.uid
+  );
+
+  // Verificamos si el perfil es del usuario logeado
+  const isOwner = currentUser?.id === user?.id;
 
   // Initialize follow state based on whether currentUser is following authorId
   const isFollowing = user?.followers?.includes(currentUser?.id) || false;
@@ -56,6 +62,7 @@ export default function Profile() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [followed, setFollowed] = useState(isFollowing);
 
+  // Filtramos las publicaciones que sean del usuario y que esten publicas
   const postsFiltered = posts
     .filter((post) => post.userId === user?.id)
     .filter((post) => post?.show === true);
@@ -64,9 +71,69 @@ export default function Profile() {
   const handleOpenLinks = () => {
     // Verificamos que user.links exista y sea un array
     if (user?.links && Array.isArray(user.links)) {
-      openModal(user.links); // <--- AQUÍ LE PASAMOS LA DATA AL CONTEXTO
+      openModal(user.links);
     }
   };
+
+  // Array del menú de navegación
+  const menu = [
+    {
+      id: "GyGYQ5wKyh10Ba",
+      show: true,
+      Icon: LayoutDashboard,
+      title: "Publicaciones",
+      path: "",
+    },
+    {
+      id: "MuML3vSxMpJuiw",
+      show: user?.music,
+      Icon: AudioLines,
+      title: "Música",
+      path: "music",
+    },
+    {
+      id: "ChYObT3IUuc4Go",
+      show: user?.collections,
+      Icon: Folder,
+      title: "Collecciones",
+      path: "collections",
+    },
+    {
+      id: "KlrrZIk3zajdqU",
+      show: true,
+      Icon: Grid3X3,
+      title: "Media",
+      path: "media",
+    },
+    {
+      id: "qENSSbZBPpbDVL",
+      show: user?.shop,
+      Icon: ShoppingBagIcon,
+      title: "Tienda",
+      path: "shop",
+    },
+    {
+      id: "Pt5Uxk77mdi9Rv",
+      show: true,
+      Icon: ArrowPathRoundedSquareIcon,
+      title: "Republicaciones",
+      path: "reposts",
+    },
+    {
+      id: "kqgFjxemEn1rYO",
+      show: isOwner,
+      Icon: BookmarkIcon,
+      title: "Guardados",
+      path: "saved",
+    },
+    {
+      id: "mc0HzML99NPh8f",
+      show: false,
+      Icon: HeartIcon,
+      title: "Me gustas",
+      path: "loved",
+    },
+  ];
 
   return (
     <>
@@ -161,7 +228,11 @@ export default function Profile() {
           )}
           {!user?.banner && (
             <div className="inset-0 absolute backdrop-blur-sm">
-              <img src="/images/photo.png" alt="" className="size-full object-contain object-center pointer-events-none select-none" />
+              <img
+                src="/images/photo.png"
+                alt=""
+                className="size-full object-contain object-center pointer-events-none select-none"
+              />
             </div>
           )}
         </div>
@@ -328,55 +399,19 @@ export default function Profile() {
           </div>
         </div>
         {/* Navegación */}
-        <div className="w-full flex border-t border-neutral-200 dark:border-neutral-800">
-          <Link
-            to={`/${user?.username}`}
-            className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-out"
-          >
-            <LayoutDashboard strokeWidth={1.5} />
-          </Link>
-          {user?.music && (
-            <Link
-              to={`/${user?.username}/music`}
-              className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-out"
-            >
-              <AudioLines strokeWidth={1.5} />
-            </Link>
-          )}
-          {user?.collections && (
-            <Link
-              to={`/${user?.username}/collections`}
-              className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-out"
-            >
-              <Folder strokeWidth={1.5} />
-            </Link>
-          )}
-          <Link
-            to={`/${user?.username}/media`}
-            className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-out"
-          >
-            <Grid3X3 strokeWidth={1.5} />
-          </Link>
-          {user?.shop && (
-            <Link
-              to={`/${user?.username}/shop`}
-              className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-out"
-            >
-              <ShoppingBagIcon className="size-6" />
-            </Link>
-          )}
-          <Link
-            to={`/${user?.username}/reposts`}
-            className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-out"
-          >
-            <ArrowPathRoundedSquareIcon className="size-6.5" />
-          </Link>
-          <Link
-            to={`/${user?.username}/saved`}
-            className="w-full h-12 flex items-center justify-center hover:bg-neutral-800/50 transition-all duration-300 ease-out"
-          >
-            <BookmarkIcon className="size-6.5" />
-          </Link>
+        <div className="w-full flex gap-px rounded-b-xl border-t border-neutral-200 dark:border-neutral-800 bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+          {menu
+            .filter((item) => item.show)
+            .map((item, index) => (
+              <Link
+                key={item.id || index}
+                to={`/${user?.username}${item.path ? `/${item.path}` : ""}`}
+                title={item.title}
+                className="w-full h-12 flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 transition-all duration-300 ease-out"
+              >
+                {item.Icon && <item.Icon strokeWidth={1.5} className="size-6" />}
+              </Link>
+            ))}
         </div>
       </div>
       <div className="size-full mt-1 mb-22 md:mb-4 rounded-xl overflow-hidden">

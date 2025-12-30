@@ -39,7 +39,7 @@ export default function PageHeaderHome() {
   const favorites = currentUser?.favorites || [];
 
   const mutuals = users.filter(
-    (user) => following.includes(user.uid) === followers.includes(user.uid)
+    (user) => following.includes(user?.uid) === followers.includes(user?.uid)
   );
 
   const feeds = [
@@ -90,7 +90,6 @@ export default function PageHeaderHome() {
   }, [scrollPosition]);
 
   const headerStyle = {
-    // -46px, -54px
     top: scrollDirection === "down" ? "-46px" : "0px",
   };
 
@@ -202,7 +201,7 @@ export default function PageHeaderHome() {
           </div>
         </div>
         <div className="w-full md:w-auto px-2 md:px-4 py-2 md:py-4 flex items-center justify-center">
-          <div className="w-full md:w-auto flex items-center justify-start gap-1 overflow-x-scroll md:overflow-y-auto custom-scrollbar">
+          <div className="w-full md:w-auto flex items-center justify-start gap-1 overflow-x-auto custom-scrollbar">
             {feeds
               .filter((feed) => feed.show)
               .map((feed) => (
@@ -235,8 +234,8 @@ export default function PageHeaderHome() {
         </div>
       </div>
       <div className="w-full h-26 flex md:hidden"></div>
-      <div className="w-full p-4 sticky top-0 z-50 hidden md:flex items-center justify-center bg-neutral-50/50 dark:bg-neutral-950/50 backdrop-blur-xl transition-all duration-300 ease-out">
-        <div className="w-auto flex items-center justify-start gap-1.5 overflow-x-scroll md:overflow-y-auto custom-scrollbar">
+      <div className="w-full sticky top-0 z-50 hidden md:flex items-center justify-center bg-neutral-50/50 dark:bg-neutral-950/50 backdrop-blur-xl transition-all duration-300 ease-out">
+        <div className="size-full p-4 mx-auto flex items-center justify-center gap-1.5 overflow-x-auto custom-scrollbar">
           {feeds
             .filter((feed) => feed.show)
             .map((feed) => (
@@ -250,21 +249,6 @@ export default function PageHeaderHome() {
                 path={`feeds/${feed.id}`}
               />
             ))}
-          {currentUser?.feeds?.length < 2 ? (
-            <Link
-              to="/feeds"
-              className="size-9 px-3 cursor-pointer text-sm flex items-center rounded-xl bg-neutral-100/75 dark:bg-neutral-900/75 border border-neutral-200/75 dark:border-neutral-800/75 transition-all duration-300 ease-out active:underline active:transform active:scale-106 active:-rotate-6 hover:underline hover:transform hover:scale-106 hover:-rotate-6"
-            >
-              X
-            </Link>
-          ) : (
-            <Link
-              to="/feeds/create"
-              className="min-w-9 size-9 cursor-pointer text-sm flex items-center justify-center rounded-xl bg-neutral-100/75 dark:bg-neutral-900/75 border border-neutral-200/75 dark:border-neutral-800/75 transition-all duration-300 ease-out active:underline active:transform active:scale-106 active:-rotate-6 hover:underline hover:transform hover:scale-106 hover:-rotate-6"
-            >
-              <Plus size={16} />
-            </Link>
-          )}
         </div>
       </div>
     </>

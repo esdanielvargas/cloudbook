@@ -40,7 +40,7 @@ export default function PostContent({
       )}
       {video && <PostVideo video={video ? video : videoId} />}
       {link && (
-        <LinkPreview link={link?.url ? link?.url : link} poster={poster} />
+        <PostLink link={link?.url ? link?.url : link} poster={poster} />
       )}
       {repost && <PostRepost repost={repost} author={author} />}
     </div>

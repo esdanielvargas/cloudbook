@@ -3,7 +3,7 @@ export default function Loader() {
     <div className="w-full h-screen flex items-center justify-center">
       <div className="flex flex-col items-center">
         <img
-          src="/logo.svg"
+          src="/images/favicon.ico"
           alt="Isotipo de CloudBook"
           title="Isotipo de CloudBook"
           className="z-5 object-cover object-center select-none pointer-events-none"

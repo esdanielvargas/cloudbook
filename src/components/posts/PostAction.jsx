@@ -41,13 +41,12 @@ export default function PostAction(props) {
     author,
   } = props;
 
-  console.log(props)
-
   const auth = useAuth(db);
   const users = useUsers(db);
   const navigate = useNavigate();
   const notifications = useNotify(db);
 
+  // Usuario logeado
   const currentUser = users.find((user) => user?.uid === auth?.uid);
   const userId = currentUser?.id || null;
 

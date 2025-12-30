@@ -102,7 +102,7 @@ export default function Compose() {
   };
 
   const [url, setUrl] = useState(false);
-  const [link, setLink] = useState([]);
+  const [link, setLink] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -127,41 +127,71 @@ export default function Compose() {
     return () => clearTimeout(timer);
   }, [link]); // Se ejecuta cada vez que 'link' cambia
 
-  const fetchPreviewData = async (linkUrl) => {
-    // 1. BLINDAJE: Si no hay linkUrl o no es un texto, nos detenemos.
-    // Esto evita el error "replace is not a function"
+const fetchPreviewData = async (linkUrl) => {
+    // 1. BLINDAJE: Validaciones básicas
     if (!linkUrl || typeof linkUrl !== "string") return;
 
     setLoading(true);
     setError(null);
 
-    // 2. LIMPIEZA
-    // .trim() borra espacios en blanco al inicio o final (ej: " google.com ")
     const cleanText = linkUrl.trim();
-
-    // Tu regex está perfecta: quita http:// o https:// si existen
+    // Quitamos el protocolo para limpiarlo, pero luego lo agregaremos al llamar a la API
     const linkWithoutProtocol = cleanText.replace(/^https?:\/\//, "");
+    const finalUrl = `https://${linkWithoutProtocol}`; // Reconstruimos URL segura
+
+    // --- DETECCIÓN DE YOUTUBE ---
+    // Buscamos si el link contiene "youtube.com" o "youtu.be"
+    const isYouTube = /(youtube\.com|youtu\.be)/.test(linkWithoutProtocol);
 
     try {
-      // Usamos Microlink
-      const response = await fetch(
-        `https://api.microlink.io/?url=https://${encodeURIComponent(
-          linkWithoutProtocol
-        )}`
-      );
+      let resultData = null;
 
-      const result = await response.json();
+      if (isYouTube) {
+        // === CAMINO A: ES YOUTUBE (Usamos noembed) ===
+        // Esta API nunca falla con títulos ni miniaturas de YT
+        const response = await fetch(
+          `https://noembed.com/embed?url=${encodeURIComponent(finalUrl)}`
+        );
+        const json = await response.json();
 
-      if (result.status === "success") {
-        setData(result.data);
+        // Si noembed devuelve error, lanzamos excepción
+        if (json.error) throw new Error("Video no disponible");
+
+        // TRANSFORMACIÓN DE DATOS:
+        // Convertimos la respuesta de noembed al formato que tu tarjeta ya entiende (Microlink)
+        resultData = {
+          title: json.title,
+          description: "Ver video en YouTube", // YouTube rara vez da descripción limpia
+          image: { url: json.thumbnail_url_hq || json.thumbnail_url }, // Preferimos alta calidad
+          url: json.url || finalUrl,
+          logo: { url: "https://www.youtube.com/s/desktop/favicon.ico" },
+          publisher: "YouTube",
+        };
+
       } else {
-        // Opcional: Si falla, no mostramos error visual para no molestar mientras escriben
-        // setError("No pudimos obtener información de este enlace.");
-        console.log("No se pudo obtener preview");
-        setError("No pudimos obtener información de este enlace.");
+        // === CAMINO B: CUALQUIER OTRA WEB (Usamos Microlink) ===
+        const response = await fetch(
+          `https://api.microlink.io/?url=${encodeURIComponent(finalUrl)}`
+        );
+        const result = await response.json();
+
+        if (result.status === "success") {
+          resultData = result.data;
+        } else {
+          throw new Error("Microlink no pudo leer el enlace");
+        }
       }
+
+      // Guardamos la data (sea de YouTube o de Microlink)
+      if (resultData) {
+        setData(resultData);
+      }
+
     } catch (err) {
-      setError("Error de conexión.", err);
+      console.log("Error obteniendo preview:", err);
+      // No seteamos error visual para no molestar al usuario, 
+      // simplemente se quedará sin tarjeta o mostrará el link básico.
+      setError("No pudimos obtener información.");
     } finally {
       setLoading(false);
     }
@@ -330,24 +360,21 @@ export default function Compose() {
               {/* VISUALIZACIÓN DE LA TARJETA (Solo si hay data y no está cargando) */}
               {!loading && data && (
                 <a
-                  href={data.url}
+                  href={data.url || link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                  }}
-                  className="w-full relative flex flex-col overflow-hidden bg-neutral-950/50 border-y border-neutral-800/75"
+                  className="w-full relative flex flex-col overflow-hidden bg-neutral-100 dark:bg-neutral-950/50 border-y border-neutral-200/75 dark:border-neutral-800/75"
                 >
                   {/* Imagen de portada */}
                   {data?.image && (
                     <img
                       src={data?.image?.url}
                       alt="Preview"
-                      className="size-full max-h-85 md:max-h-141.5 object-cover object-center pointer-events-none select-none bg-neutral-950"
+                      className="size-full max-h-85 md:max-h-141.5 object-cover object-center pointer-events-none select-none bg-neutral-50 dark:bg-neutral-950"
                     />
                   )}
 
-                  <div className="w-full p-2 md:p-4 space-y-2">
+                  <div className="w-full p-2 md:p-4 space-y-2 border-t border-neutral-200/75 dark:border-neutral-800/75">
                     {/* Título */}
                     <h3
                       className="line-clamp-1 text-md"
@@ -376,6 +403,7 @@ export default function Compose() {
                           width="16"
                           height="16"
                           alt=""
+                          className="object-cover object-center pointer-events-none select-none rounded-xs"
                         />
                       )}
                       <span>
