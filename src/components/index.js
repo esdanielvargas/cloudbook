@@ -15,13 +15,11 @@ import MusicBox from "./MusicBox";
 import Range from "./Range";
 import MenuAlt from "./MenuAlt";
 import SearchBar from "./SearchBar";
-import { LinkPreview } from "./LinkPreview";
 import Tab from "./Tab";
 export * from "./buttons";
 export * from "./form";
 export * from "./posts";
 export * from "./profile";
-// export * from "./ui";
 
 export {
   Menu,
@@ -41,6 +39,5 @@ export {
   MusicBox,
   Range,
   SearchBar,
-  LinkPreview,
   Tab,
 };

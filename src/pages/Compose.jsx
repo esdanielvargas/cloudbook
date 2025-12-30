@@ -7,21 +7,19 @@ import {
   Plus,
   Video,
   X,
-  Youtube,
 } from "lucide-react";
 import {
   Form,
   FormField,
-  LinkPreview,
   MenuAlt,
   PageBox,
   PageHeader,
 } from "../components";
-import { PostHeader, PostLink } from "../components/posts";
+import { PostHeader } from "../components/posts";
 import { getAuth } from "firebase/auth";
 import { db, useUsers } from "../hooks";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
-import { Button, IconButton } from "../components/buttons";
+import { Button } from "../components/buttons";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import ReactPlayer from "react-player";

@@ -27,8 +27,6 @@ export default function ProfileReposts() {
       new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000)
   );
 
-  console.log(sortedPosts);
-
   return (
     <div className="w-full flex flex-col gap-1">
       {sortedPosts?.length > 0 ? (

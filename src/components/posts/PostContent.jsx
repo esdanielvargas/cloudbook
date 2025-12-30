@@ -4,7 +4,6 @@ import PostGallery from "./PostGallery";
 import PostVideo from "./PostVideo";
 import PostLink from "./PostLink";
 import PostRepost from "./PostRepost";
-import { LinkPreview } from "../LinkPreview";
 
 export default function PostContent({
   title,
@@ -18,7 +17,6 @@ export default function PostContent({
   author,
   premium,
   poster,
-  // setIsOpen,
 }) {
   return (
     <div className="w-full flex flex-col">
