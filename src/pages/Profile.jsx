@@ -1,4 +1,5 @@
 import {
+  Activity,
   Archive,
   AudioLines,
   BadgeCheck,
@@ -14,6 +15,8 @@ import {
   Mail,
   OctagonAlert,
   Rss,
+  SquareChartGantt,
+  SquareKanban,
   Star,
   StarOff,
   UserLock,
@@ -23,7 +26,7 @@ import {
 } from "lucide-react";
 import { Avatar, PageHeader } from "../components";
 import { Link, Outlet, useParams } from "react-router-dom";
-import { db, usePosts, useUsers } from "../hooks";
+import { db, useNotify, usePosts, useUsers } from "../hooks";
 import {
   ArrowPathRoundedSquareIcon,
   BookmarkIcon,
@@ -35,12 +38,23 @@ import { useState } from "react";
 import { Button } from "../components/buttons";
 import { useThemeColor } from "../context";
 import { getAuth } from "firebase/auth";
+import {
+  doc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  collection,
+  addDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useLinksModal } from "../context/ModalProvider";
 
 export default function Profile() {
   const auth = getAuth();
   const users = useUsers(db);
   const posts = usePosts(db);
+  const notifications = useNotify(db);
   const { username } = useParams();
   const { txtClass } = useThemeColor();
   const { openModal } = useLinksModal();
@@ -58,9 +72,68 @@ export default function Profile() {
 
   // Initialize follow state based on whether currentUser is following authorId
   const isFollowing = user?.followers?.includes(currentUser?.id) || false;
-
+  const followMe = user?.following?.includes(currentUser?.id) || false;
   const [isFavorited, setIsFavorited] = useState(false);
-  const [followed, setFollowed] = useState(isFollowing);
+
+  const follow = async (targetUserId, currentUserId) => {
+    try {
+      // Referencia al documento del usuario objetivo
+      const targetUserRef = doc(db, "users", targetUserId);
+
+      // Referencia al documento del usuario actual
+      const currentUserRef = doc(db, "users", currentUserId);
+
+      // Referencia a la colección de notificaciones
+      const notificationsRef = collection(db, "notifications");
+
+      const notification = notifications.find(
+        (notif) =>
+          notif.targetUserId === targetUserId &&
+          notif.currentUserId === currentUserId &&
+          notif.type === "follow"
+      );
+
+      if (isFollowing) {
+        // Eliminar al usuario actual de los seguidores
+        await updateDoc(targetUserRef, {
+          followers: arrayRemove(currentUserId),
+        });
+
+        // Eliminar al usuario objetivo de los seguidores
+        await updateDoc(currentUserRef, {
+          following: arrayRemove(targetUserId),
+        });
+
+        // Eliminar notificación de seguimiento
+        if (notification?.id) {
+          // Referencia al documento de la notificación
+          const notificationRef = doc(db, "notifications", notification.id);
+
+          await deleteDoc(notificationRef);
+        }
+      } else {
+        // Agregar al usuario actual a los seguidores
+        await updateDoc(targetUserRef, {
+          followers: arrayUnion(currentUserId),
+        });
+
+        // Agregar al usuario objetivos a los seguidores
+        await updateDoc(currentUserRef, {
+          following: arrayUnion(targetUserId),
+        });
+
+        // Crear notificación de seguimiento
+        await addDoc(notificationsRef, {
+          targetUserId: targetUserId,
+          currentUserId: currentUserId,
+          type: "follow",
+          createdAt: serverTimestamp(),
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar los seguidores: ", error);
+    }
+  };
 
   // Filtramos las publicaciones que sean del usuario y que esten publicas
   const postsFiltered = posts
@@ -209,7 +282,7 @@ export default function Profile() {
       />
       <div className="w-full flex flex-col items-center justify-start rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800/75">
         {/* Portada del perfil */}
-        <div className="w-full h-36 min-h-36 md:h-50 md:min-h-50 relative flex items-center justify-center rounded-t-xl overflow-hidden bg-neutral-200/75 dark:bg-neutral-950/45">
+        <div className="w-full h-36 min-h-36 md:h-50 md:min-h-50 relative flex items-center justify-center rounded-t-xl overflow-hidden bg-neutral-200/75 dark:bg-neutral-950/45 border-b border-neutral-200/75 dark:border-neutral-800/75">
           {(user?.banner || user?.avatar) && (
             <img
               src={user?.banner || user?.avatar}
@@ -226,11 +299,11 @@ export default function Profile() {
               }}
             />
           )}
-          {!user?.banner && (
+          {(!user?.banner && !user?.avatar) && (
             <div className="inset-0 absolute backdrop-blur-sm">
               <img
                 src="/images/photo.png"
-                alt=""
+                alt="undefined"
                 className="size-full object-contain object-center pointer-events-none select-none"
               />
             </div>
@@ -252,34 +325,53 @@ export default function Profile() {
             <div className="w-full relative flex items-center justify-end gap-1">
               {currentUser && currentUser?.uid !== user?.uid ? (
                 <>
-                  {/* <Button variant="inactive" className="px-0! aspect-square!">
+                  <Button variant="inactive" className="px-0! aspect-square!">
                     <Star size={20} strokeWidth={1.5} />
-                  </Button> */}
-                  <Button variant="icon" className="px-0! aspect-square!">
-                    <Mail size={20} strokeWidth={1.5} />
                   </Button>
+                  {/* <Button variant="inactive" className="px-0! aspect-square!">
+                    <Mail size={20} strokeWidth={1.5} />
+                  </Button> */}
                   <Button
                     variant={isFollowing ? "followed" : "follow"}
-                    onClick={() => setFollowed(!followed)}
+                    onClick={() => follow(user?.id, currentUser?.id)}
                   >
-                    {isFollowing ? "Siguiendo" : "Seguir"}
+                    {/* {isFollowing ? "Siguiendo" : "Seguir"} */}
+                    {!isFollowing
+                      ? followMe
+                        ? "Seguir también"
+                        : "Seguir"
+                      : "Siguiendo"}
                   </Button>
                 </>
               ) : (
                 <>
                   <Button
-                    variant="icon"
+                    variant="inactive"
                     className="px-0! aspect-square!"
                     to={`/${user?.username}/edit`}
+                    title="Editar perfil"
                   >
                     <UserPen size={22} strokeWidth={1.5} />
                   </Button>
                   <Button
-                    variant="icon"
+                    variant="inactive"
                     className="px-0! aspect-square!"
                     to={`/${user?.username}/archive`}
+                    title="Archivo"
                   >
                     <Archive size={22} strokeWidth={1.5} />
+                  </Button>
+                  <Button
+                    variant="inactive"
+                    className="px-0! aspect-square!"
+                    to={`/${user?.username}/stats`}
+                    title="Estadísticas"
+                  >
+                    <SquareKanban
+                      size={22}
+                      strokeWidth={1.5}
+                      className="rotate-180"
+                    />
                   </Button>
                 </>
               )}
@@ -409,7 +501,9 @@ export default function Profile() {
                 title={item.title}
                 className="w-full h-12 flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 transition-all duration-300 ease-out"
               >
-                {item.Icon && <item.Icon strokeWidth={1.5} className="size-6" />}
+                {item.Icon && (
+                  <item.Icon strokeWidth={1.5} className="size-6" />
+                )}
               </Link>
             ))}
         </div>
