@@ -58,7 +58,7 @@ export default function PageHeader({
 
   return (
     <>
-    <div className="w-full md:w-142 p-2 md:py-4 md:px-0  -min-h-17.5 z-10 fixed md:sticky left-0 md:left-auto top-0 flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-950/50 backdrop-blur-xl">
+    <div className="w-full md:w-142 p-2 md:py-4 md:px-0 z-10 fixed md:sticky left-0 md:left-auto top-0 flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-950/50 backdrop-blur-xl">
       {/* Botón volver atrás */}
       <div className="min-w-max flex items-center justify-start">
         <HeaderButton
@@ -117,7 +117,7 @@ export default function PageHeader({
         )}
       </div>
     </div>
-    <div className="w-full h-16 md:h-18.5 mb-0.5 md:mb-1.5 flex md:hidden" />
+    <div className="w-full min-h-13.5 mb-0.5 md:mb-1.5 flex md:hidden" />
     </>
   );
 }

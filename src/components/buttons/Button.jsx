@@ -30,7 +30,7 @@ export default function Button({
     active:
       "bg-neutral-950 dark:bg-neutral-50 text-neutral-50 dark:text-neutral-950",
     inactive:
-      "hover:bg-neutral-200/75 dark:bg-neutral-800/75 text-neutral-950 dark:text-white text-sm border border-neutral-300/50 dark:border-neutral-700/75",
+      "bg-neutral-100/75 hover:bg-neutral-200/75 dark:bg-neutral-800/75 hover:dark:bg-neutral-700/75 text-neutral-950 dark:text-white text-sm border border-neutral-300/50 dark:border-neutral-700/75",
       submit: `!min-w-24 ${bgClass} ${hoverClass} text-white ${borderClass}`,
   };
 
