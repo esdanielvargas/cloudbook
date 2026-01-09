@@ -19,6 +19,9 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host: true
+  },
   compilerOptions: {
     types: ["vite/client"],
   },
