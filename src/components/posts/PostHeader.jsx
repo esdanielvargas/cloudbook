@@ -3,26 +3,21 @@ import { Button, Nudge } from "../buttons";
 import MenuAlt from "../MenuAlt";
 import UserCard from "../UserCard";
 import {
-  Activity,
   Archive,
   Edit,
   Ellipsis,
-  EllipsisVertical,
   Eye,
   EyeOff,
-  KeyRound,
   Link2,
   OctagonAlert,
   Pin,
-  SquareArrowOutUpRight,
-  Star,
   Trash2 as Trash,
-  UserMinus,
-  UserPlus,
-  UserX,
 } from "lucide-react";
 import { copyPostLink } from "../../utils";
 import PageLine from "../PageLine";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../../hooks";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function PostHeader(props) {
   const { postId, action = true, username, author } = props;
@@ -46,36 +41,122 @@ export default function PostHeader(props) {
     };
   }, [isOpen]);
 
+  const changeStatus = async (status) => {
+    // Validar que el ID de la publicación exista
+    if (!props?.postId) return;
+    const postRef = doc(db, "photos", props.postId);
+
+    // Mapeo de mensajes para personalizar la notificación
+    const messages = {
+      public: "¡La publicación ahora es pública! 🌍",
+      archived: "Publicación archivada correctamente 🗄️",
+      deleted: "Se movió a la papelera 🗑️",
+      hidden: "Publicación ocultada 👁️‍🗨️",
+    };
+
+    // Definir estados permitidos (seguridad extra)
+    const validStatuses = ["public", "archived", "hidden", "deleted"];
+
+    if (!validStatuses.includes(status)) {
+      console.error("Estado no válido:", status);
+      return;
+    }
+
+    try {
+      // Una sola llamada para actualizar
+      await updateDoc(postRef, { status: status });
+
+      toast.info(messages[status], {
+        position: "bottom-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } catch (error) {
+      console.error("Error al cambiar el estado:", error);
+      toast.error("Error al actualizar. Intenta de nuevo.");
+    }
+  };
+
   return (
     <div className="w-full flex items-center justify-between">
-      <UserCard {...props} authorId={props?.id} postId={postId} />
+      <UserCard
+        {...props}
+        status={props?.status}
+        authorId={props?.id}
+        postId={postId}
+      />
       {action ? (
-        <div className="h-full -ml-2 pr-2 md:pr-4 flex items-center justify-end gap-2 relative">
+        <div className="w-full p-2 md:p-4 flex items-center justify-end relative">
           <Button variant="icon" onClick={() => setIsOpen((prev) => !prev)}>
-            <EllipsisVertical size={20} strokeWidth={1.5} />
+            <Ellipsis size={18} strokeWidth={1.5} />
           </Button>
-          <MenuAlt isOpen={isOpen} ref={menuRef} className="z-10 top-4 right-4">
+          <MenuAlt ref={menuRef} isOpen={isOpen} className="z-10 top-4 right-4">
             {author ? (
               <>
-                <Nudge Icon={Pin} title="Fijar en el perfil" />
+                <Nudge
+                  Icon={Pin}
+                  title="Fijar en el perfil"
+                  className="text-neutral-500! cursor-no-drop!"
+                />
                 <PageLine />
-                <Nudge Icon={Edit} title="Editar publicación" />
-                <Nudge Icon={Archive} title="Archivar publicación" />
-                <Nudge Icon={Trash} title="Eliminar publicación" alert />
+                <Nudge
+                  Icon={Edit}
+                  title="Editar publicación"
+                  to={`/compose?post=${postId}`}
+                />
+                <Nudge
+                  Icon={Archive}
+                  title={
+                    props?.status === "public"
+                      ? "Archivar publicación"
+                      : "Desarchivar publicación"
+                  }
+                  onClick={() =>
+                    changeStatus(
+                      props?.status === "public" ? "archived" : "public"
+                    )
+                  }
+                />
+                {props?.status !== "hidden" && props?.status !== "deleted" && (
+                  <Nudge
+                    Icon={Trash}
+                    title="Mover a la papelera"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "¿Deseas mover a la papelera esta publicación? Tendrás 30 días para restaurar está publicación."
+                        )
+                      ) {
+                        changeStatus("deleted");
+                      }
+                    }}
+                    alert
+                  />
+                )}
               </>
             ) : (
               <>
-                <Nudge Icon={Eye} title="Me interesa" />
-                <Nudge Icon={EyeOff} title="No me interesa" />
-                <PageLine />
-                <Nudge Icon={Star} title="Añadir a favoritos" />
-                <Nudge Icon={UserPlus} title={`Seguir a @${username}`} />
                 <Nudge
-                  Icon={UserMinus}
-                  title={`Dejar de seguir a @${username}`}
+                  Icon={Eye}
+                  title="Me interesa"
+                  className="text-neutral-500! cursor-no-drop!"
                 />
-                <Nudge Icon={UserX} title={`Bloquear a @${username}`} />
-                <Nudge Icon={OctagonAlert} title="Reportar publicación" alert />
+                <Nudge
+                  Icon={EyeOff}
+                  title="No me interesa"
+                  className="text-neutral-500! cursor-no-drop!"
+                />
+                <PageLine />
+                <Nudge
+                  Icon={OctagonAlert}
+                  title="Reportar publicación"
+                  alert
+                />
               </>
             )}
             <PageLine />
@@ -86,6 +167,18 @@ export default function PostHeader(props) {
               onClick={() => copyPostLink(username, postId) + setIsOpen(false)}
             />
           </MenuAlt>
+          <ToastContainer
+            position="top-center"
+            autoClose={2000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </div>
       ) : null}
     </div>
