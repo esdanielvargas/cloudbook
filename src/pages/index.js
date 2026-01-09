@@ -18,6 +18,8 @@ import Notify from "./Notify";
 import Profile from "./Profile";
 import ProfileInfo from "./ProfileInfo";
 import ProfileEdit from "./ProfileEdit";
+import ProfileArchive from "./ProfileArchive";
+import ProfileTrashCan from "./ProfileTrashCan";
 import ProfileFollowers from "./ProfileFollowers";
 import ProfileFollowing from "./ProfileFollowing";
 import PagePost from "./PagePost";
@@ -31,7 +33,6 @@ import SettingsAccountLocation from "./SettingsAccountLocation";
 import SettingsPrivacyAndSecurity from "./SettingsPrivacyAndSecurity";
 import SettingsAbout from "./SettingsAbout";
 import Appearance from "./Appearance";
-import Archive from "./Archive";
 import Preferences from "./Preferences";
 import PreferencesUsers from "./PreferencesUsers";
 import PreferencesTopics from "./PreferencesTopics";
@@ -58,6 +59,8 @@ export {
   Profile,
   ProfileInfo,
   ProfileEdit,
+  ProfileArchive,
+  ProfileTrashCan,
   ProfileFollowers,
   ProfileFollowing,
   PagePost,
@@ -71,7 +74,6 @@ export {
   SettingsPrivacyAndSecurity,
   SettingsAbout,
   Appearance,
-  Archive,
   Preferences,
   PreferencesUsers,
   PreferencesTopics,

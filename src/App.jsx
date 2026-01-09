@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthLayout, AppLayout } from "./layouts";
 import {
   Appearance,
-  Archive,
   CustomFeed,
   Favorites,
   FeedCreate,
@@ -15,6 +14,8 @@ import {
   PagePostActivity,
   PagePostActivityUsers,
   ProfileEdit,
+  ProfileArchive,
+  ProfileTrashCan,
   ProfileFollowers,
   ProfileFollowing,
   ProfileInfo,
@@ -83,7 +84,6 @@ function App() {
                   element={<FeedCreate title="Nuevo feed" />}
                 />
                 <Route path="/feeds/:id/edit" element={<CustomFeed edit />} />
-                
                 <Route path="/search" element={<Search />} />
                 <Route path="/search/profiles" element={<SearchUsers />} />
                 <Route path="/search/posts" element={<SearchPosts />} />
@@ -94,6 +94,7 @@ function App() {
                 <Route path="/compose" element={<Compose />} />
                 <Route path="/chats" element={<Chats />} />
                 <Route path="/notify" element={<Notify />} />
+                {/* Profile */}
                 <Route path="/:username" element={<Profile />}>
                   <Route index element={<ProfilePosts />} />
                   <Route path="/:username/media" element={<ProfileMedia />} />
@@ -111,8 +112,10 @@ function App() {
                 </Route>
                 <Route path="/:username/info" element={<ProfileInfo />} />
                 <Route path="/:username/edit" element={<ProfileEdit />} />
-                <Route path="/:username/archive" element={<Archive />} />
+                <Route path="/:username/archive" element={<ProfileArchive />} />
+                <Route path="/:username/trash-can" element={<ProfileTrashCan />} />
                 <Route path="/:username/post/:postId" element={<PagePost />} />
+                <Route path="/post/:postId" element={<PagePost />} />
                 <Route
                   path="/:username/followers"
                   element={<ProfileFollowers />}
@@ -129,6 +132,7 @@ function App() {
                   path="/:username/post/:postId/activity/:action"
                   element={<PagePostActivityUsers />}
                 />
+                {/* Settings */}
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/settings/account" element={<SettingsAccount />} />
                 <Route
