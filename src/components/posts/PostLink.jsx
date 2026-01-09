@@ -57,7 +57,11 @@ export default function PostLink({ link, poster }) {
           {data?.image && (
             <img
               src={poster ? poster : data?.image?.url}
-              alt="Preview"
+              width={566}
+              height={566}
+              loading="eager"
+              alt={`${data?.title}: ${data?.description}`}
+              title={`${data?.title}: ${data?.description}`}
               className="size-full max-h-85 md:max-h-141.5 object-cover object-center pointer-events-none select-none bg-neutral-50 dark:bg-neutral-950"
             />
           )}
@@ -88,9 +92,11 @@ export default function PostLink({ link, poster }) {
                       ? `https://www.google.com/s2/favicons?domain=${link}&sz=64`
                       : data?.logo?.url
                   }
-                  width="16"
-                  height="16"
-                  alt=""
+                  width={16}
+                  height={16}
+                  loading="lazy"
+                  alt={`Favicon de ${data?.publisher || new URL(data?.url).hostname}`}
+                  title={`Favicon de ${data?.publisher || new URL(data?.url).hostname}`}
                   className="object-cover object-center pointer-events-none select-none rounded-xs"
                 />
               )}
