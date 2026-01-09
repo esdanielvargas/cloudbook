@@ -4,7 +4,7 @@ export default function Reactive({ counter = 0, active, color, children, ...prop
   return (
     <button
       type="button"
-      className={`h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 cursor-pointer ${
+      className={`h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-xl hover:bg-neutral-200/50 hover:dark:bg-neutral-800/50 -border border-neutral-200 dark:border-neutral-800 cursor-pointer transition-all duration-300 ease-out ${
         active ? color : ""
       }`}
       {...props}

@@ -1,9 +1,7 @@
 import {
-  Activity,
   Archive,
   AudioLines,
   BadgeCheck,
-  ChartNoAxesCombined,
   EllipsisVertical,
   Folder,
   Grid3X3,
@@ -12,10 +10,8 @@ import {
   Link2,
   ListPlus,
   ListX,
-  Mail,
   OctagonAlert,
   Rss,
-  SquareChartGantt,
   SquareKanban,
   Star,
   StarOff,
@@ -299,7 +295,7 @@ export default function Profile() {
               }}
             />
           )}
-          {(!user?.banner && !user?.avatar) && (
+          {!user?.banner && !user?.avatar && (
             <div className="inset-0 absolute backdrop-blur-sm">
               <img
                 src="/images/photo.png"
@@ -315,10 +311,10 @@ export default function Profile() {
             {/* Foto de perfil */}
             <div className="absolute flex items-center justify-center">
               <Avatar
-                size={80}
+                size={88}
                 action={false}
                 avatar={user?.avatar}
-                className="rounded-3xl!"
+                className="size-22! md:size-26! rounded-3xl! md:rounded-4xl!"
               />
             </div>
             {/* Botones de acción */}
@@ -328,14 +324,10 @@ export default function Profile() {
                   <Button variant="inactive" className="px-0! aspect-square!">
                     <Star size={20} strokeWidth={1.5} />
                   </Button>
-                  {/* <Button variant="inactive" className="px-0! aspect-square!">
-                    <Mail size={20} strokeWidth={1.5} />
-                  </Button> */}
                   <Button
                     variant={isFollowing ? "followed" : "follow"}
                     onClick={() => follow(user?.id, currentUser?.id)}
                   >
-                    {/* {isFollowing ? "Siguiendo" : "Seguir"} */}
                     {!isFollowing
                       ? followMe
                         ? "Seguir también"
@@ -348,10 +340,14 @@ export default function Profile() {
                   <Button
                     variant="inactive"
                     className="px-0! aspect-square!"
-                    to={`/${user?.username}/edit`}
-                    title="Editar perfil"
+                    to={`/${user?.username}/stats`}
+                    title="Estadísticas"
                   >
-                    <UserPen size={22} strokeWidth={1.5} />
+                    <SquareKanban
+                      size={20}
+                      strokeWidth={1.5}
+                      className="rotate-180"
+                    />
                   </Button>
                   <Button
                     variant="inactive"
@@ -359,19 +355,18 @@ export default function Profile() {
                     to={`/${user?.username}/archive`}
                     title="Archivo"
                   >
-                    <Archive size={22} strokeWidth={1.5} />
+                    <Archive size={20} strokeWidth={1.5} />
                   </Button>
                   <Button
                     variant="inactive"
-                    className="px-0! aspect-square!"
-                    to={`/${user?.username}/stats`}
-                    title="Estadísticas"
+                    className="px-0! aspect-square! md:px-3! md:aspect-auto!"
+                    to={`/${user?.username}/edit`}
+                    title="Editar perfil"
                   >
-                    <SquareKanban
-                      size={22}
-                      strokeWidth={1.5}
-                      className="rotate-180"
-                    />
+                    <span className="flex md:hidden">
+                      <UserPen size={20} strokeWidth={1.5} />
+                    </span>
+                    <span className="hidden md:flex">Editar perfil</span>
                   </Button>
                 </>
               )}
