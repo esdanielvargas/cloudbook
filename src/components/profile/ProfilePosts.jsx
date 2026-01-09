@@ -1,8 +1,10 @@
 import { useParams } from "react-router-dom";
 import { db, usePosts, useUsers } from "../../hooks";
 import Post from "../Post";
+import { getAuth } from "firebase/auth";
 
 export default function ProfilePosts() {
+  const auth = getAuth();
   const posts = usePosts(db);
   const users = useUsers(db);
 
@@ -16,7 +18,7 @@ export default function ProfilePosts() {
   const userPosts = posts.filter((post) => post?.userId === user?.id);
 
   // Filtramos solo los posts publicos
-  const statusPosts = userPosts.filter((post) => post?.show === true);
+  const statusPosts = userPosts.filter((post) => post?.status === "public");
 
   // Ordenamos del más nuevo al más antiguo
   const sortedPosts = [...statusPosts].sort(
@@ -24,11 +26,20 @@ export default function ProfilePosts() {
       new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000)
   );
 
+  // Comparamos el usuario de este perfil con el usuario logeado
+  const isAuthor = auth?.currentUser?.uid === user?.uid;
+
   return (
     <div className="w-full flex flex-col gap-1">
       {sortedPosts?.length > 0 ? (
         sortedPosts.map((post) => (
-          <Post key={post.id} {...post} {...user} postId={post?.id} />
+          <Post
+            key={post.id}
+            {...post}
+            {...user}
+            author={isAuthor}
+            postId={post?.id}
+          />
         ))
       ) : (
         <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">

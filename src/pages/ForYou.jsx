@@ -1,6 +1,6 @@
+import { db, usePosts, useUsers } from "../hooks";
 import { getAuth } from "firebase/auth";
 import Post from "../components/Post";
-import { db, usePosts, useUsers } from "../hooks";
 
 export default function ForYou() {
   const auth = getAuth();
