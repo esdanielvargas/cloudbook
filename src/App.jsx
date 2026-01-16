@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthLayout, AppLayout } from "./layouts";
 import {
+  Login,
+  Register,
   Appearance,
   CustomFeed,
   Favorites,
@@ -8,7 +10,6 @@ import {
   Feeds,
   Following,
   Home,
-  Login,
   Mutuals,
   NoFound,
   PagePostActivity,
@@ -37,9 +38,9 @@ import {
   ProfileReposts,
   ProfileSaved,
 } from "./components/profile";
-import { db, useAuth } from "./hooks";
 import { useState } from "react";
 import { useEffect } from "react";
+import { db, useAuth } from "./hooks";
 
 const ForYou = lazy(() => import("./pages/ForYou"));
 const Search = lazy(() => import("./pages/Search"));
@@ -113,7 +114,10 @@ function App() {
                 <Route path="/:username/info" element={<ProfileInfo />} />
                 <Route path="/:username/edit" element={<ProfileEdit />} />
                 <Route path="/:username/archive" element={<ProfileArchive />} />
-                <Route path="/:username/trash-can" element={<ProfileTrashCan />} />
+                <Route
+                  path="/:username/trash-can"
+                  element={<ProfileTrashCan />}
+                />
                 <Route path="/:username/post/:postId" element={<PagePost />} />
                 <Route path="/post/:postId" element={<PagePost />} />
                 <Route
@@ -158,10 +162,7 @@ function App() {
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<Login />} />
-                <Route
-                  path="/register"
-                  element={<Navigate to="/login" replace />}
-                />
+                <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<>Error</>} />
               </Route>
             </>
