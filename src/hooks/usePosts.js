@@ -5,7 +5,7 @@ export function usePosts(db) {
     const [posts, setPosts] = useState([]);
   
     useEffect(() => {
-      const ref = collection(db, "photos");
+      const ref = collection(db, "posts");
   
       const unsubscribe = onSnapshot(ref, (snapshot) => {
         const data = snapshot.docs.map((doc) => {

@@ -1,7 +1,7 @@
 /* Abreviación de números grandes. */
 export default function abbrNumber(counter) {
   if (typeof counter !== "number" || isNaN(counter)) {
-    return "???";
+    return "0";
   }
 
   const units = [
