@@ -1,8 +1,5 @@
-import { Languages, Palette, Sun } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
-import Button from "../components/buttons/Button";
 import { useThemeColor } from "../context";
-import { IconButton } from "../components";
 
 export default function AuthLayout() {
   const { txtClass } = useThemeColor();
@@ -44,15 +41,6 @@ export default function AuthLayout() {
           <h1 className="sr-only">Bienvenidos a {name}</h1>
           <h2 className="font-black text-2xl font-sans">{name}</h2>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="icon" title="" disabled>
-              <Languages size={18} strokeWidth={1.5} />
-            </Button>
-            <Button type="button" variant="icon" title="" disabled>
-              <Sun size={18} strokeWidth={1.5} />
-            </Button>
-            <Button type="button" variant="icon" title="" disabled>
-              <Palette size={18} strokeWidth={1.5} />
-            </Button>
           </div>
         </header>
 
