@@ -6,6 +6,7 @@ import PostMeta from "./PostMeta";
 import PostAction from "./PostAction";
 import PostInput from "./PostInput";
 import PostComments from "./PostComments";
+import CommentBox from "./CommentBox";
 import PostLink from "./PostLink";
 import PostLine from "./PostLine";
 
@@ -18,6 +19,7 @@ export {
   PostAction,
   PostInput,
   PostComments,
+  CommentBox,
   PostLink,
   PostLine,
 };
