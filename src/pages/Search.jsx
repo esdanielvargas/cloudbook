@@ -59,11 +59,11 @@ export default function Search() {
   const filteredUsers = !isHashtagSearch
     ? users.filter((user) => {
         const matchesSearch =
-          user.name.toLowerCase().includes(debouncedTerm) ||
-          user.username.toLowerCase().includes(debouncedTerm);
+          user?.name.toLowerCase().includes(debouncedTerm) ||
+          user?.username.toLowerCase().includes(debouncedTerm);
         const matchesPopular =
-          !filters.popular || user.followers.length >= 1000;
-        const matchesVerified = !filters.verified || user.verified;
+          !filters?.popular || user?.followers?.length >= 1000;
+        const matchesVerified = !filters?.verified?.status || user?.verified?.status;
         return matchesSearch && matchesPopular && matchesVerified;
       })
     : [];
@@ -75,89 +75,8 @@ export default function Search() {
 
   //Usuarios populares para la búsqueda
   const popular = users.filter(
-    (user) => user?.followers?.length >= 1000 || user?.verified
+    (user) => user?.followers?.length >= 1000 || user?.verified?.status
   );
-
-  // Contenido según el tab activo
-  // const renderContent = () => {
-  //   if (activeTab === "foryou") {
-  //     return popular
-  //       .sort((a, b) => b.followers.length - a.followers.length)
-  //       .map((user, index) => (
-  //         <div
-  //           key={index}
-  //           className="w-full px-3 cursor-pointer flex items-center justify-between rounded-lg border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-out"
-  //         >
-  //           <UserCard {...user} users />
-  //           <button
-  //             type="button"
-  //             className={`h-9 px-2 md:px-4 flex items-center justify-center cursor-pointer rounded-lg ${bgClass} ${hoverClass} transition-all`}
-  //           >
-  //             <div className="flex md:hidden">
-  //               <UserPlusIcon className="size-6" />
-  //             </div>
-  //             <div className="hidden md:flex font-bold text-sm text-white">
-  //               Seguir
-  //             </div>
-  //           </button>
-  //         </div>
-  //       ));
-  //   }
-
-  //   if (activeTab === "profiles") {
-  //     return filteredUsers.length > 0 ? (
-  //       filteredUsers
-  //         .sort((a, b) => b.followers.length - a.followers.length)
-  //         .map((user, index) => (
-  //           <div
-  //             key={index}
-  //             className="w-full px-3 flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all duration-300 ease-out"
-  //           >
-  //             <UserCard {...user} users />
-  //             <button
-  //               type="button"
-  //               className={`h-9 px-2 md:px-4 flex items-center justify-center cursor-pointer rounded-lg ${bgClass} ${hoverClass} transition-all`}
-  //             >
-  //               <div className="flex md:hidden">
-  //                 <UserPlusIcon className="size-6" />
-  //               </div>
-  //               <div className="hidden md:flex font-bold text-sm text-white">
-  //                 Seguir
-  //               </div>
-  //             </button>
-  //           </div>
-  //         ))
-  //     ) : (
-  //       <div className="py-10 text-center text-neutral-500 dark:text-neutral-400">
-  //         No se encontraron usuarios con ese nombre 😕
-  //       </div>
-  //     );
-  //   }
-
-  //   if (activeTab === "posts") {
-  //     return filteredPosts.length > 0 ? (
-  //       filteredPosts.map((post, index) => (
-  //         <div
-  //           key={index}
-  //           className="w-full px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all duration-300 ease-out"
-  //         >
-  //           {/* Asumiendo que tienes un componente PostCard para mostrar publicaciones */}
-  //           <div>{post.content}</div>
-  //         </div>
-  //       ))
-  //     ) : (
-  //       <div className="py-10 text-center text-neutral-500 dark:text-neutral-400">
-  //         No se encontraron publicaciones con ese hashtag 😕
-  //       </div>
-  //     );
-  //   }
-
-  //   return (
-  //     <div className="py-10 text-center text-neutral-500 dark:text-neutral-400">
-  //       Esta sección está en desarrollo (lanzamientos, fotos, videos).
-  //     </div>
-  //   );
-  // };
 
   return (
     <>
@@ -196,16 +115,16 @@ export default function Search() {
               label: "Destacados",
               to: "/search",
             },
-            {
-              id: "users",
-              label: "Perfiles",
-              to: "/search/profiles",
-            },
-            {
-              id: "posts",
-              label: "Publicaciones",
-              to: "/search/posts",
-            },
+            // {
+            //   id: "users",
+            //   label: "Perfiles",
+            //   to: "/search/profiles",
+            // },
+            // {
+            //   id: "posts",
+            //   label: "Publicaciones",
+            //   to: "/search/posts",
+            // },
           ]}
           activeTab={"/search"}
           // onChange={(tabId) => {
@@ -214,15 +133,15 @@ export default function Search() {
           // }}
         />
         <div className="w-full hidden space-y-1">
-          {filteredUsers.length > 0 ? (
+          {filteredUsers?.length > 0 ? (
             filteredUsers
-              .sort((a, b) => b.followers.length - a.followers.length)
+              .sort((a, b) => b.followers?.length - a.followers?.length)
               .map((user, index) => (
                 <div
                   key={index}
                   className="w-full px-3 flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all duration-300 ease-out"
                 >
-                  <UserCard {...user} users />
+                  <UserCard {...user} showFollowButton={true} users />
                   <button
                     type="button"
                     className={`h-9 px-2 md:px-4 flex items-center justify-center cursor-pointer rounded-lg ${bgClass} ${hoverClass} transition-all`}
@@ -242,7 +161,7 @@ export default function Search() {
             </div>
           )}
           ---
-          {filteredPosts.length > 0 ? (
+          {filteredPosts?.length > 0 ? (
             filteredPosts
               .slice(0, 3)
               .map((post) => <Post key={post.id} {...post} />)
@@ -255,26 +174,26 @@ export default function Search() {
         <div className="w-full space-y-1">
           {searchTerm
             ? filteredUsers
-                .sort((a, b) => b.followers.length - a.followers.length)
+                .sort((a, b) => b.followers?.length - a.followers?.length)
                 .map((user, index) => (
                   <div
                     key={index}
                     className="w-full cursor-pointer flex items-center justify-between rounded-lg border border-neutral-200/50 dark:border-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-out"
                   >
-                    <UserCard {...user} users />
+                    <UserCard {...user} showFollowButton={true} users />
                   </div>
                 ))
             : popular
-                .sort((a, b) => b.followers.length - a.followers.length)
+                .sort((a, b) => b.followers?.length - a.followers?.length)
                 .map((user, index) => (
                   <div
                     key={index}
                     className="w-full cursor-pointer flex items-center justify-between rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-out"
                   >
-                    <UserCard {...user} users />
+                    <UserCard {...user} showFollowButton={true} users />
                   </div>
                 ))}
-          {filteredUsers.length === 0 && !isHashtagSearch && (
+          {filteredUsers?.length === 0 && !isHashtagSearch && (
             <div className="py-10 text-center text-neutral-500 dark:text-neutral-400">
               No se encontraron usuarios con ese nombre 😕
             </div>
