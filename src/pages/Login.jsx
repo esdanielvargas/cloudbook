@@ -1,56 +1,45 @@
-import { useState } from "react";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { LockKeyhole, Mail } from "lucide-react";
-import { FormInput } from "../components/ui/form/FormInput";
-import { Button } from "../components";
+import { Button, FormInput } from "../components";
 import { useThemeColor } from "../context";
-import supabase from "../utils/supabase";
 
 export default function Login() {
+  const auth = getAuth();
   const navigate = useNavigate();
   const { txtClass } = useThemeColor();
   const { register, handleSubmit } = useForm();
-  const [loading, setLoading] = useState(false);
 
-  // --- Lógica para Google ---
+  const provider = new GoogleAuthProvider();
+
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          // A dónde vuelve el usuario después de loguearse en Google
-        //   redirectTo: window.location.origin,
-        redirectTo: `https://kujqnvheiszavhzeamkd.supabase.co/auth/v1/callback/google`,
-        },
-      });
-      if (error) throw error;
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("Usuario con Google:", user);
+      navigate("/");
     } catch (error) {
-      console.error("Error con Google Sign-In:", error.message);
+      console.error("Error con Google Sign-In", error.code, error.message);
     }
   };
 
-  // --- Lógica para Email/Password ---
-  const onSubmit = async (formData) => {
-    setLoading(true);
-    const { email, password } = formData;
+  const onSubmit = async (data) => {
+    const { email, password } = data;
 
     try {
-      // 1. Intentamos iniciar sesión
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      await signInWithEmailAndPassword(auth, email, password);
 
-      if (error) throw error;
-
-      console.log("Sesión iniciada:", data.user);
-      navigate("/"); // Redirigir al home
+      navigate("/");
     } catch (error) {
-      console.error("Error al iniciar sesión:", error.message);
-      alert("Error: " + error.message);
-    } finally {
-      setLoading(false);
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.error("Error al iniciar sesión", errorCode, errorMessage, error);
     }
   };
 
@@ -83,15 +72,14 @@ export default function Login() {
           label="Contraseña"
           type="password"
           icon={<LockKeyhole size={20} />}
-          placeholder="Ingresa tu contraseña"
-          {...register("password", { required: true, minLength: 6 })}
+          placeholder="Ingresa tu contrasela"
+          {...register("password", { required: true, minLength: 8 })}
           required
         />
         <div className="w-full flex flex-col gap-2">
-          <Button full variant="follow" type="submit" disabled={loading}>
-            {loading ? "Cargando..." : "Iniciar sesión"}
+          <Button full variant="follow" type="submit">
+            Inciar sesión
           </Button>
-
           {/* Divider */}
           <div className="flex items-center gap-2 my-2">
             <span className="flex-1 h-px bg-neutral-300 dark:bg-neutral-700" />
@@ -100,15 +88,14 @@ export default function Login() {
           </div>
 
           {/* Google Button */}
-          <Button type="button" variant="secondary" onClick={handleGoogleLogin}>
+          <Button variant="secondary" onClick={handleGoogleLogin} disabled>
             <img
               src="/images/google.svg"
-              width={16}
-              height={16}
+              width={14}
+              height={14}
               alt="Logotipo de Google"
               title="Logotipo de Google"
               loading="eager"
-              className="size-4"
             />
             Continuar con Google
           </Button>

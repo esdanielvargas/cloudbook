@@ -11,9 +11,8 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { FormInput } from "../components/ui/form/FormInput";
 import { useThemeColor } from "../context";
-import { Button } from "../components";
+import { Button, FormInput } from "../components";
 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {
@@ -242,9 +241,9 @@ export default function Register() {
         username,
         birthdate: date,
         bio: bio || "",
-        interests: selectedInterests,
         avatar: photoURL,
-        created_at: new Date().toISOString(),
+        interests: selectedInterests,
+        createdAt: new Date().toISOString(),
       });
 
       navigate("/");

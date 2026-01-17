@@ -1,24 +1,23 @@
 import {
-  ClockPlus,
   File,
   Images,
   Link2,
-  Loader2,
   Plus,
   Video,
   X,
+  Pencil,
 } from "lucide-react";
-import {
-  Form,
-  FormField,
-  MenuAlt,
-  PageBox,
-  PageHeader,
-} from "../components";
+import { Form, FormField, MenuAlt, PageBox, PageHeader } from "../components";
 import { PostHeader } from "../components/posts";
 import { getAuth } from "firebase/auth";
-import { db, useUsers } from "../hooks";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { db, usePosts, useUsers } from "../hooks";
+import {
+  addDoc,
+  collection,
+  doc,
+  Timestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { Button } from "../components/buttons";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -26,20 +25,37 @@ import ReactPlayer from "react-player";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "../firebase/config";
 import { v4 } from "uuid";
-import { useNavigate } from "react-router-dom";
-// import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
-// import { storage } from "../firebase/config";
-// import { v4 } from "uuid";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import PostRepost from "../components/posts/PostRepost";
+import PostTitle from "../components/posts/PostTitle";
 
 export default function Compose() {
   const auth = getAuth();
   const users = useUsers(db);
+  const posts = usePosts(db);
   const navigate = useNavigate();
-  const { register, watch, handleSubmit, reset } = useForm();
+
+  // 1. CAMBIO: Usamos searchParams para leer ?post=ID
+  const [searchParams] = useSearchParams();
+  const postId = searchParams.get("post");
+  const repostId = searchParams.get("repost");
+
+  // Buscamos el post si existe el ID
+  const postSelected = postId
+    ? posts.find((post) => post?.id === postId)
+    : null;
+
+  const repostSelected = repostId
+    ? posts.find((post) => post?.id === repostId)
+    : null;
+
+  const { register, watch, handleSubmit, setValue, reset } = useForm();
 
   const currentUser = users.find(
     (user) => user?.uid === auth?.currentUser?.uid
   );
+
+  const title = watch("title");
 
   const [rows, setRows] = useState(1);
   const limit = 12;
@@ -47,38 +63,94 @@ export default function Compose() {
   const [photos, setPhotos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [video, setVideo] = useState(false);
+  const videoId = watch("video");
+
+  const [url, setUrl] = useState(false);
+  const [link, setLink] = useState("");
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 2. CAMBIO: Efecto para cargar datos si estamos editando
+  useEffect(() => {
+    if (postSelected) {
+      // Cargar Caption
+      setValue("title", postSelected.title || "");
+      setValue("caption", postSelected.caption || "");
+
+      // Cargar Fotos existentes
+      if (postSelected.photos && postSelected.photos.length > 0) {
+        const existingPhotos = postSelected.photos.map((photoUrl) => ({
+          file: null, // No hay archivo físico porque ya está en la nube
+          url: photoUrl,
+          isExisting: true, // Bandera para saber que no hay que resubirla
+        }));
+        setPhotos(existingPhotos);
+      }
+
+      // Cargar Video
+      if (postSelected.video) {
+        setVideo(true);
+        setValue("video", postSelected.video);
+      }
+
+      // Cargar Link
+      // === CAMBIO PARA LINK ===
+      // Verificamos si el post guardado tiene la estructura nueva (linkPreview)
+      // o la vieja (link string) para mantener compatibilidad
+      if (postSelected.linkPreview) {
+        // Estructura NUEVA y OPTIMIZADA
+        setUrl(true);
+        setLink(postSelected.linkPreview.url);
+
+        // Importante: Seteamos la 'data' directamente desde lo guardado
+        // ¡Ya no hace falta hacer fetch de nuevo al editar!
+        setData({
+          title: postSelected.linkPreview.title,
+          description: postSelected.linkPreview.description,
+          image: { url: postSelected.linkPreview.image },
+          url: postSelected.linkPreview.url,
+          publisher: postSelected.linkPreview.publisher,
+          logo: { url: postSelected.linkPreview.logo },
+        });
+      } else if (postSelected.link) {
+        // Estructura VIEJA (solo string)
+        // Aquí sí dejamos que el otro useEffect haga el fetch
+        setUrl(true);
+        setLink(postSelected.link);
+      }
+    }
+  }, [postSelected, setValue]);
 
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
 
     setPhotos((prevFiles) => {
-      // Limitar a 10 imágenes en total
       if (prevFiles.length + selectedFiles.length > 6) {
         alert("Solo puedes subir hasta 6 imágenes.");
-        return prevFiles; // No añadir más imágenes
+        return prevFiles;
       }
 
       const newFileURLs = selectedFiles.map((file) => ({
         file,
         url: URL.createObjectURL(file),
-        // url: URL.createObjectURL(file),
+        isExisting: false,
       }));
       return [...prevFiles, ...newFileURLs];
     });
-
-    // setPhotos(selectedFiles);
   };
 
   const handleRemoveFile = (indexToRemove) => {
     setPhotos((prevFiles) => {
       const fileToRemove = prevFiles[indexToRemove];
-      if (fileToRemove?.url) {
+      // Solo revocamos URL si es un archivo local nuevo
+      if (fileToRemove?.url && !fileToRemove.isExisting) {
         URL.revokeObjectURL(fileToRemove.url);
       }
 
       const newFiles = prevFiles.filter((_, index) => index !== indexToRemove);
 
-      // Ajustar el índice de la foto actual
       if (indexToRemove === currentIndex && newFiles.length > 0) {
         setCurrentIndex((prevIndex) =>
           prevIndex >= newFiles.length ? newFiles.length - 1 : prevIndex
@@ -99,164 +171,178 @@ export default function Compose() {
     return url;
   };
 
-  const [url, setUrl] = useState(false);
-  const [link, setLink] = useState("");
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
   useEffect(() => {
-    // 1. Si el input está vacío, limpiamos la data y no hacemos nada
     if (!link) {
       setData(null);
       setError(null);
       return;
     }
-
-    // 2. Iniciamos el TEMPORIZADOR (Debounce)
-    // Esperará 1000ms (1 segundo) después de que dejes de escribir
     const timer = setTimeout(() => {
       fetchPreviewData(link);
     }, 1000);
-
-    // 3. Función de LIMPIEZA
-    // Esto es magia de React: Si el usuario escribe antes de que pase el segundo,
-    // esta línea se ejecuta primero, mata el timer anterior y crea uno nuevo.
     return () => clearTimeout(timer);
-  }, [link]); // Se ejecuta cada vez que 'link' cambia
+  }, [link]);
 
-const fetchPreviewData = async (linkUrl) => {
-    // 1. BLINDAJE: Validaciones básicas
+  const fetchPreviewData = async (linkUrl) => {
+    // ... (Tu código actual de fetchPreviewData) ...
+    // Nota: Copia tu función fetchPreviewData aquí, la he omitido para no hacer la respuesta gigante,
+    // pero la lógica es la misma.
     if (!linkUrl || typeof linkUrl !== "string") return;
-
     setLoading(true);
     setError(null);
-
     const cleanText = linkUrl.trim();
-    // Quitamos el protocolo para limpiarlo, pero luego lo agregaremos al llamar a la API
     const linkWithoutProtocol = cleanText.replace(/^https?:\/\//, "");
-    const finalUrl = `https://${linkWithoutProtocol}`; // Reconstruimos URL segura
-
-    // --- DETECCIÓN DE YOUTUBE ---
-    // Buscamos si el link contiene "youtube.com" o "youtu.be"
+    const finalUrl = `https://${linkWithoutProtocol}`;
     const isYouTube = /(youtube\.com|youtu\.be)/.test(linkWithoutProtocol);
 
     try {
       let resultData = null;
-
       if (isYouTube) {
-        // === CAMINO A: ES YOUTUBE (Usamos noembed) ===
-        // Esta API nunca falla con títulos ni miniaturas de YT
         const response = await fetch(
           `https://noembed.com/embed?url=${encodeURIComponent(finalUrl)}`
         );
         const json = await response.json();
-
-        // Si noembed devuelve error, lanzamos excepción
         if (json.error) throw new Error("Video no disponible");
-
-        // TRANSFORMACIÓN DE DATOS:
-        // Convertimos la respuesta de noembed al formato que tu tarjeta ya entiende (Microlink)
         resultData = {
           title: json.title,
-          description: "Ver video en YouTube", // YouTube rara vez da descripción limpia
-          image: { url: json.thumbnail_url_hq || json.thumbnail_url }, // Preferimos alta calidad
+          description: "Ver video en YouTube",
+          image: { url: json.thumbnail_url_hq || json.thumbnail_url },
           url: json.url || finalUrl,
           logo: { url: "https://www.youtube.com/s/desktop/favicon.ico" },
           publisher: "YouTube",
         };
-
       } else {
-        // === CAMINO B: CUALQUIER OTRA WEB (Usamos Microlink) ===
         const response = await fetch(
           `https://api.microlink.io/?url=${encodeURIComponent(finalUrl)}`
         );
         const result = await response.json();
-
-        if (result.status === "success") {
-          resultData = result.data;
-        } else {
-          throw new Error("Microlink no pudo leer el enlace");
-        }
+        if (result.status === "success") resultData = result.data;
+        else throw new Error("Microlink no pudo leer el enlace");
       }
-
-      // Guardamos la data (sea de YouTube o de Microlink)
-      if (resultData) {
-        setData(resultData);
-      }
-
+      if (resultData) setData(resultData);
     } catch (err) {
-      console.log("Error obteniendo preview:", err);
-      // No seteamos error visual para no molestar al usuario, 
-      // simplemente se quedará sin tarjeta o mostrará el link básico.
+      console.log("Error preview:", err);
       setError("No pudimos obtener información.");
     } finally {
       setLoading(false);
     }
   };
 
-  const onSubmit = async (data) => {
-    // Evitar doble clic si ya se está enviando
+  const onSubmit = async (formData) => {
     if (isSubmitting) return;
 
-    // Validaciones: Asegurar que hay texto, imágenes, o ambos
-    if (!data.caption && photos.length === 0 && !video && !link) {
+    if (
+      !data?.caption &&
+      photos?.length === 0 &&
+      !videoId?.length === 0 &&
+      !link
+    ) {
       alert("No puedes publicar un post vacío.");
       return;
     }
 
-    // 1. ACTIVAR LOADING
     setIsSubmitting(true);
 
     try {
-      // Subir las imágenes (si existen) y obtener las URLs
       const photoURLs =
         photos.length > 0
-          ? await Promise.all(photos.map((photo) => uploadFile(photo.file)))
+          ? await Promise.all(
+              photos.map(async (photo) => {
+                if (photo.isExisting) return photo.url;
+                return await uploadFile(photo.file);
+              })
+            )
           : [];
 
       const userId = currentUser?.id;
 
-      // Crear el objeto de datos para la publicación
-      const posts = collection(db, "photos");
-      const post = await addDoc(posts, {
+      // Preparamos el objeto de metadata del enlace
+      let linkData = null;
+
+      // Si hay un enlace escrito Y tenemos la data de la previsualización cargada
+      if (link && data) {
+        linkData = {
+          url: link, // La url original
+          title: data.title || "",
+          description: data.description || "",
+          image: data.image?.url || "", // Guardamos la URL de la imagen directamente
+          publisher: data.publisher || "",
+          logo: data.logo?.url || "",
+        };
+      } else if (link && !data) {
+        // Fallback: Si el usuario puso un link pero la API falló o no cargó,
+        // guardamos al menos la URL pura.
+        linkData = {
+          url: link,
+          title: link, // Usamos la URL como título temporal
+          description: "",
+          image: "",
+          publisher: "",
+        };
+      }
+
+      const postPayload = {
         userId: userId,
-        caption: data.caption || "",
+        repost: repostId,
+        caption: formData.caption || "",
         photos: photoURLs || [],
-        video: data.video || "",
-        link: link || "",
-        posted: Timestamp.now(),
-        show: true,
-      });
+        title: formData.title || "",
+        video: formData.video || "",
+        link: linkData || [],
+        status: "public",
+      };
 
-      console.log("post: ", post);
+      if (postId) {
+        // === MODO EDICIÓN ===
+        const postRef = doc(db, "posts", postId);
 
-      // Resetear el formulario y estado
+        // Validar seguridad: verificar que el post sea del usuario actual
+        if (postSelected.userId !== userId) {
+          alert("No tienes permiso para editar esto");
+          return;
+        }
+
+        await updateDoc(postRef, {
+          ...postPayload,
+          updatedAt: Timestamp.now(),
+        });
+      } else {
+        // === MODO CREACIÓN ===
+        const postsRef = collection(db, "posts");
+
+        await addDoc(postsRef, {
+          ...postPayload,
+          posted: Timestamp.now(),
+        });
+      }
+
       reset();
-      setPhotos(false);
+      setPhotos([]);
       setVideo(false);
       setLink("");
       setUrl(false);
       navigate(`/${currentUser?.username}`);
     } catch (error) {
-      console.error("Error al crear la publicación:", error);
-      alert("Hubo un error al crear la publicación. Inténtalo de nuevo.");
+      console.error("Error al guardar la publicación:", error);
+      alert("Hubo un error. Inténtalo de nuevo.");
     } finally {
-      // 2. DESACTIVAR LOADING (Se ejecuta siempre, haya error o no)
       setIsSubmitting(false);
     }
   };
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <>
       <PageHeader
-        title="Nueva publicación"
-        Icon={File}
-        iconTitle="Borradores"
+        title={postId ? "Editar publicación" : "Nueva publicación"}
+        Icon={postId ? Pencil : File}
+        iconTitle={postId ? "Editando" : "Borradores"}
       />
       <PageBox active className="relative p-0! gap-0!">
-        <PostHeader {...currentUser} posted={Timestamp.now()} action={false} />
+        <PostHeader
+          {...currentUser}
+          posted={postSelected?.posted || Timestamp.now()}
+          action={false}
+        />
         <Button
           variant="icon"
           className="absolute top-2 right-2 md:top-4 md:right-4 flex md:hidden"
@@ -264,29 +350,35 @@ const fetchPreviewData = async (linkUrl) => {
         >
           <Plus size={20} strokeWidth={1.5} />
         </Button>
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 text-xs">{watch("caption")?.length}/560</div>
         <Form onSubmit={handleSubmit(onSubmit)}>
-          <div className="w-full px-2 md:px-4 mb-2 md:mb-4 flex flex-col">
+          <div className="w-full px-2 md:px-4 mb-2 md:mb-4 flex flex-col items-center">
+            {title && <PostTitle title={title} />}
             <textarea
               rows={rows}
               {...register("caption")}
-              placeholder="¿En qué estás pensando?"
+              placeholder={
+                postId ? "Edita tu publicación..." : "¿En qué estás pensando?"
+              }
+              maxLength={560}
               className={`w-full min-h-5 max-h-25 resize-none md:resize-y text-xs md:text-sm focus:outline-none`}
             />
           </div>
+
           {/* Carrusel de fotos */}
           {photos.length > 0 && (
             <div className="w-full max-h-85.5 md:max-h-141.5 relative flex items-center justify-start gap-0.5 -md:gap-2 overflow-x-scroll custom-scrollbar">
               {photos.map((_, index) => (
                 <div
                   key={index}
-                  className="min-w-85.5 md:min-w-141.5 h-full relative flex items-center justify-center cursor-grab active:cursor-grabbing"
+                  className="min-w-85.5 md:min-w-141.5 h-full relative flex items-center justify-center"
                 >
-                  <div className="absolute top-2 left-2 text-xs font-mono">{`${
+                  <div className="absolute top-2 left-2 text-xs font-mono text-white bg-black/50 px-1 rounded">{`${
                     index + 1
                   }/${photos?.length}`}</div>
                   <Button
                     variant="icon"
-                    className="size-7! absolute top-2 right-2 rounded-full!"
+                    className="size-7! absolute top-2 right-2 rounded-full! bg-black/50 hover:bg-black/70 text-white"
                     onClick={() => handleRemoveFile(index)}
                   >
                     <X size={18} className="size-4.5" strokeWidth={1.5} />
@@ -294,7 +386,7 @@ const fetchPreviewData = async (linkUrl) => {
                   <img
                     src={photos[index]?.url}
                     alt="Preview"
-                    className="size-full object-cover object-center select-none pointer-events-none bg-neutral-800 box-border"
+                    className="size-full object-cover object-center bg-neutral-800"
                   />
                 </div>
               ))}
@@ -302,60 +394,66 @@ const fetchPreviewData = async (linkUrl) => {
           )}
           {/* Video */}
           {video && (
-            <div className="mb-2 md:mb-4 space-y-2 md:space-y-4">
+            <div className="w-full mb-2 md:mb-4 flex flex-col items-center justify-center gap-2 md:gap-4">
               {watch("video") && (
                 <div className="w-full h-[192px] md:h-[336px] flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
                   <ReactPlayer
-                    playing
+                    playing={false}
                     url={`https://www.youtube.com/watch?v=${
-                      watch("video") ? watch("video") : "T_bXeiYr7b0"
+                      watch("video") || ""
                     }`}
-                    light={`https://i.ytimg.com/vi/${
-                      watch("video") ? watch("video") : "T_bXeiYr7b0"
-                    }/maxresdefault.jpg`}
+                    light={`https://i.ytimg.com/vi/${watch(
+                      "video"
+                    )}/maxresdefault.jpg`}
                     width="100%"
                     height="100%"
                   />
                 </div>
               )}
-              <div className="mx-2 md:mx-4">
+              <div className="w-full px-2 md:px-4 flex flex-col items-center justify-center gap-4">
                 <FormField
                   label="ID del video de YouTube"
                   text={`https://www.youtube.com/watch?v=${
                     watch("video") ? watch("video") : "videoID"
                   }`}
-                  placeholder="Ingresa el ID del video de YouTube"
-                  {...register("video")}
+                  placeholder="Ej: UiW9-Q9z5LU"
+                  id="video"
+                  name="video"
+                  {...register("video", { required: true })}
+                  required
+                />
+                <FormField
+                  label="Título del video"
+                  placeholder="Ej: Piano Lofi + Lluvia"
+                  id="title"
+                  name="title"
+                  {...register("title", { required: true })}
+                  required
                 />
               </div>
             </div>
           )}
-          {/* Enlace */}
+
           {url && (
             <div className="w-full space-y-2 md:space-y-4">
-              {/* INPUT */}
               <div className="w-full mb-2 md:mb-4 px-2 md:px-4">
                 <FormField
                   type="search"
-                  placeholder="Ingresa el enlace que deseas compartir"
+                  placeholder="Ingresa el enlace"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
                 />
               </div>
-
-              {/* ESTADO DE CARGA */}
+              {/* Estado de carga */}
               {loading && (
                 <p className="px-2 md:px-4 text-xs" style={{ color: "#666" }}>
-                  Buscando info del enlace...
+                  Buscando información del enlace...
                 </p>
               )}
-
-              {/* MENSAJE DE ERROR */}
+              {/* Mensaje de error */}
               {error && (
                 <p className="px-2 md:px-4 text-xs text-rose-600">{error}</p>
               )}
-
-              {/* VISUALIZACIÓN DE LA TARJETA (Solo si hay data y no está cargando) */}
               {!loading && data && (
                 <a
                   href={data.url || link}
@@ -389,7 +487,7 @@ const fetchPreviewData = async (linkUrl) => {
                       {data?.description || "Sin descripción disponible."}
                     </p>
 
-                    {/* Pequeño Favicon + Dominio (Toque extra) */}
+                    {/* Pequeño favicon + dominio */}
                     <div className="w-full mt-3 flex items-center gap-1.5 text-xs text-neutral-500">
                       {data.logo && (
                         <img
@@ -404,94 +502,59 @@ const fetchPreviewData = async (linkUrl) => {
                           className="object-cover object-center pointer-events-none select-none rounded-xs"
                         />
                       )}
-                      <span>
-                        {data?.publisher || new URL(data?.url).hostname}
-                      </span>
+                      {data?.publisher ||
+                        (data.url && (
+                          <span>
+                            {data?.publisher || new URL(data?.url).hostname}
+                          </span>
+                        ))}
                     </div>
                   </div>
                 </a>
               )}
             </div>
           )}
+
+          {repostSelected && <PostRepost repost={repostId} />}
+
           {/* Acciones */}
-          <div className="w-full p-2 md:p-4 flex items-center justify-between border-y border-neutral-200/75 dark:border-neutral-800/75">
+          <div className="w-full px-2 py-2 md:px-4 flex items-center justify-between border-y border-neutral-200/75 dark:border-neutral-800/75">
             <div className="w-full flex items-center justify-start gap-2">
-              <Button
-                variant="icon"
-                title="Añadir fotos"
-                className="relative disabled:text-neutral-500!"
-                disabled={watch("video") || video || url ? true : false}
-              >
+              <Button variant="icon" className="relative">
                 <label
                   htmlFor="photos"
-                  className={`size-full absolute z-2 flex items-center justify-center ${
-                    watch("video") || video
-                      ? "cursor-no-drop"
-                      : "cursor-pointer"
-                  }`}
+                  className="cursor-pointer flex items-center"
                 >
-                  <Images size={20} strokeWidth={1.5} />
+                  <Images size={20} />
                 </label>
                 <input
                   type="file"
-                  accept="image/png, image/jpg, image/jpeg, image/gif, image/webp, image/svg"
-                  {...register("photos")}
-                  onChange={handleFileChange}
-                  disabled={watch("video") || video ? true : false}
-                  className="size-full absolute z-1"
+                  id="photos"
                   multiple
                   hidden
-                  id="photos"
+                  onChange={handleFileChange}
                 />
               </Button>
-              <Button
-                variant="icon"
-                title="Añadir video de YouTube"
-                onClick={() => setVideo(!video)}
-                disabled={photos.length > 0 || url ? true : false}
-                className="disabled:cursor-no-drop! disabled:text-neutral-500!"
-              >
-                <Video size={20} strokeWidth={1.5} />
+              <Button variant="icon" onClick={() => setVideo(!video)}>
+                <Video size={20} />
               </Button>
-              <Button
-                variant="icon"
-                title="Añadir enlace"
-                className="disabled:cursor-no-drop! disabled:text-neutral-500!"
-                disabled={photos.length > 0 || video ? true : false}
-                onClick={() => setUrl(!url)}
-              >
+              <Button variant="icon" onClick={() => setUrl(!url)}>
                 <Link2 size={20} className="-rotate-45" />
               </Button>
             </div>
+
             <div className="w-full flex items-center justify-end gap-1 md:gap-2">
-              <div className="relative">
-                <Button
-                  variant="icon"
-                  title="Programar publicación"
-                  className="disabled:cursor-no-drop! disabled:text-neutral-500!"
-                  disabled
-                >
-                  <ClockPlus size={20} strokeWidth={1.5} />
-                </Button>
-                <MenuAlt className="bottom-0 right-0"></MenuAlt>
-              </div>
               <Button
                 type="submit"
                 variant="follow"
-                disabled={isSubmitting} // Deshabilita el botón mientras carga
-                className={
-                  isSubmitting ? "opacity-70 cursor-not-allowed gap-2" : ""
-                }
+                disabled={isSubmitting}
+                className={isSubmitting ? "opacity-70 cursor-not-allowed" : ""}
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />{" "}
-                    {/* Icono girando */}
-                    Publicando...
-                  </>
-                ) : (
-                  "Publicar"
-                )}
+                {isSubmitting
+                  ? "Guardando..."
+                  : postId
+                  ? "Actualizar"
+                  : "Publicar"}
               </Button>
             </div>
           </div>

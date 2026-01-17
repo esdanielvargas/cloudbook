@@ -4,6 +4,7 @@ export const FormInput = ({
   type,
   placeholder,
   required,
+  error,
   ...rest
 }) => {
   return (
@@ -20,13 +21,18 @@ export const FormInput = ({
         ) : null}
         <input
           type={type || "text"}
-          className="w-full h-10 font-normal text-xs md:text-sm font-sans pr-3.5 focus:outline-none appearance-none"
+          className="w-full h-10.5 pr-3.5 font-normal text-xs md:text-sm font-sans text-black dark:text-white focus:outline-none appearance-none"
           placeholder={placeholder || "Escribe aquí..."}
           required={required ? true : false}
           autoComplete="current-password"
           {...rest}
         />
       </div>
+      {error && (
+        <div className="w-full flex items-center justify-start">
+          <span className="text-xs text-rose-600">{error}</span>
+        </div>
+      )}
     </div>
   );
 };
