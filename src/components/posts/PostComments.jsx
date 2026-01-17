@@ -1,13 +1,7 @@
-import {
-  ChatBubbleBottomCenterTextIcon,
-  HeartIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
-import UserCard from "../UserCard";
-import { Reactive } from "../buttons";
+import { ChatBubbleBottomCenterTextIcon } from "@heroicons/react/24/outline";
 import { db, useAuth, useUsers } from "../../hooks";
-import { toggleCommentLike } from "../../utils";
 import { useParams } from "react-router-dom";
+import CommentBox from "./CommentBox";
 
 export default function PostComments(props) {
   const { comments } = props;
@@ -20,7 +14,7 @@ export default function PostComments(props) {
   return (
     <div className="size-full flex flex-col items-center justify-center">
       {comments?.length > 0 ? (
-        <div className="size-full p-4 flex flex-col gap-4">
+        <div className="size-full flex flex-col">
           {comments
             .sort((a, b) => b.createdAt - a.createdAt)
             .map((comment, index) => {
@@ -33,70 +27,31 @@ export default function PostComments(props) {
               const lovedByUser = comment?.likes?.includes(author?.id);
 
               return (
-                <div
+                <CommentBox
                   key={comment.id}
-                  className={`w-full flex flex-col${
-                    comments?.length === index + 1
-                      ? ""
-                      : " pb-4 border-b border-dashed border-neutral-800"
-                  }`}
-                >
-                  <UserCard
-                    {...commentAuthor}
-                    posted={comment.createdAt}
-                    p="pb-4"
-                  />
-                  <div className="w-full flex items-start gap-2">
-                    <div className="min-w-9 flex items-center justify-center">
-                      <div className="w-0.5 h-full hidden bg-neutral-800"></div>
-                    </div>
-                    <div className="w-full flex flex-col gap-4">
-                      <div className="w-full flex items-start">
-                        <div className="w-full text-[12.5px]">
-                          {comment.text}
-                        </div>
-                      </div>
-                      <div className="w-full flex items-center justify-start gap-2">
-                        <Reactive
-                          title="Me gusta"
-                          count={comment?.likes?.length}
-                          active={lovedByUser}
-                          color="text-rose-500"
-                          onclick={() =>
-                            toggleCommentLike(
-                              postId,
-                              comment.id,
-                              currentUser.id
-                            )
-                          }
-                        >
-                          <HeartIcon strokeWidth={2} />
-                        </Reactive>
-                        {isAuthor ? (
-                          <Reactive title="Eliminar comentario">
-                            <TrashIcon
-                              strokeWidth={2}
-                              className="transition-all duration-300 ease-out hover:text-red-500"
-                            />
-                          </Reactive>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  index={index}
+                  postId={postId}
+                  author={author}
+                  comment={comment}
+                  comments={comments}
+                  isAuthor={isAuthor}
+                  lovedByUser={lovedByUser}
+                  currentUser={currentUser}
+                  commentAuthor={commentAuthor}
+                />
               );
             })}
         </div>
       ) : (
-        <div className="size-full min-h-100 flex flex-col items-center justify-center gap-2">
+        <div className="size-full min-h-80 md:min-h-100 flex flex-col items-center justify-center gap-2">
           <ChatBubbleBottomCenterTextIcon
             className="size-20 select-none pointer-events-none"
-            strokeWidth={1.5}
+            strokeWidth={1}
           />
-          <div className="font-bold text-xl font-sans select-none pointer-events-none">
+          <div className="font-bold text-lg md:text-xl font-sans select-none pointer-events-none">
             Aún no hay comentarios
           </div>
-          <div className="font-normal text-[13px] font-sans text-neutral-400 select-none pointer-events-none">
+          <div className="font-normal text-xs md:text-sm font-sans text-neutral-400 select-none pointer-events-none">
             Sé el primero en comentar.
           </div>
         </div>

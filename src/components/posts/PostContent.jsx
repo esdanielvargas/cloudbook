@@ -16,7 +16,7 @@ export default function PostContent({
   repost,
   author,
   premium,
-  poster,
+  action,
 }) {
   return (
     <div className="w-full flex flex-col">
@@ -38,7 +38,7 @@ export default function PostContent({
       )}
       {video && <PostVideo video={video ? video : videoId} />}
       {link && (
-        <PostLink link={link?.url ? link?.url : link} poster={poster} />
+        <PostLink {...link} repost={repost} action={action} />
       )}
       {repost && <PostRepost repost={repost} author={author} />}
     </div>

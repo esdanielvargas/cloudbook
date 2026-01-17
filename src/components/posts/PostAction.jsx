@@ -1,8 +1,5 @@
-import {
-  BookmarkIcon as BookmarkSolid,
-  HeartIcon as HeartSolid,
-} from "@heroicons/react/24/solid";
-import { db, useAuth, useNotify, useUsers } from "../../hooks";
+import { BookmarkIcon as BookmarkSolid } from "@heroicons/react/24/solid";
+import { db, useNotify, useUsers } from "../../hooks";
 import { Nudge, Reactive } from "../buttons";
 import {
   ArrowPathRoundedSquareIcon as ArrowsRounded,
@@ -12,22 +9,14 @@ import {
   HeartIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
-import {
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  collection,
-  deleteDoc,
-  doc,
-  // getDoc,
-  Timestamp,
-  updateDoc,
-} from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import MenuAlt from "../MenuAlt";
 import { useEffect, useRef, useState } from "react";
-import { Link2 as Link, Share } from "lucide-react";
-import { copyPostLink } from "../../utils";
+import { Bookmark, Heart, Link2 as Link, Share } from "lucide-react";
+import { copyPostLink, toggleLike } from "../../utils";
+import { getAuth } from "firebase/auth";
+import PageLine from "../PageLine";
+import { toggleSave } from "../../utils/toggleSave";
 
 export default function PostAction(props) {
   const {
@@ -35,76 +24,21 @@ export default function PostAction(props) {
     comments = [],
     reposts = [],
     shared = [],
-    // saved = [],
+    saved = [],
     username,
     postId,
     author,
   } = props;
 
-  const auth = useAuth(db);
+  const auth = getAuth();
   const users = useUsers(db);
   const navigate = useNavigate();
   const notifications = useNotify(db);
 
-  // Usuario logeado
-  const currentUser = users.find((user) => user?.uid === auth?.uid);
-  const userId = currentUser?.id || null;
+  const currentUser = users.find(
+    (user) => user?.uid === auth?.currentUser?.uid,
+  );
 
-  // Love & Likes
-  const lovedByUser = likes?.includes(currentUser?.id);
-  
-  const loved = Array.isArray(props?.likes)
-    ? props?.likes?.includes(userId)
-    : false;
-
-  const giveLove = async (postId, targetUserId, currentUserId) => {
-    try {
-      // Referencia al documento de la publicación
-      const postRef = doc(db, "photos", postId);
-
-      // Referencia a la colección de notificaciones
-      const notificationsRef = collection(db, "notifications");
-
-      const notification = notifications.find(
-        (notif) =>
-          notif.targetUserId === targetUserId &&
-          notif.currentUserId === currentUserId &&
-          notif.type === "like"
-      );
-
-      if (loved) {
-        // Eliminar al usuario actual de los me gustas de la publicación
-        await updateDoc(postRef, {
-          likes: arrayRemove(currentUserId),
-        });
-
-        // Eliminar notificación de seguimiento
-        if (notification?.id) {
-          // Referencia al documento de la notificación
-          const notificationRef = doc(db, "notifications", notification.id);
-          await deleteDoc(notificationRef);
-        }
-      } else {
-        // Agregar al usuario actual a los me gustas de la publicación
-        await updateDoc(postRef, {
-          likes: arrayUnion(currentUserId),
-        });
-
-        // Crear notificación de seguimiento
-        await addDoc(notificationsRef, {
-          targetUserId,
-          currentUserId: currentUser?.id,
-          postId,
-          type: "like",
-          time: Timestamp.now(),
-        });
-      }
-    } catch (error) {
-      console.error("Error al dar like: ", error);
-    }
-  };
-
-  // Reposts
   const [repost, setRepost] = useState(false);
   const [isOpenRepost, setIsOpenRepost] = useState(false);
   const menuRepostRef = useRef(null);
@@ -128,7 +62,6 @@ export default function PostAction(props) {
     };
   }, [isOpenRepost]);
 
-  // Share
   const [isOpenShare, setIsOpenShare] = useState(false);
   const menuShareRef = useRef(null);
 
@@ -151,49 +84,79 @@ export default function PostAction(props) {
     };
   }, [isOpenShare]);
 
-  // save
-  // const savedByUser = saved?.includes(currentUser?.id);
+  // ================================ //
 
-  const saved = Array.isArray(props?.saved)
-    ? props?.saved.includes(userId)
-    : false;
+  const safeLikes = Array.isArray(likes) ? likes : [];
+  const isLikedByMe = safeLikes.some((like) => like.userId === currentUser?.id);
 
-  const savePost = async (postId, currentUserId) => {
-    try {
-      // Referencia al documento de la publicación
-      const postRef = doc(db, "photos", postId);
+  const existingLikeNotification = notifications?.find(
+    (notif) =>
+      notif.targetUserId === props?.userId &&
+      notif.currentUserId === currentUser?.id &&
+      notif.type === "like",
+  );
 
-      if (saved) {
-        // Eliminar al usuario actual de los guardados de la publicación
-        await updateDoc(postRef, { saved: arrayRemove(currentUserId) });
-      } else {
-        // Agregar al usuario actual a los guardados de la publicación
-        await updateDoc(postRef, { saved: arrayUnion(currentUserId) });
-      }
-    } catch (error) {
-      console.error("Error al guardar la publicación: ", error);
+  const handleLike = async () => {
+    await toggleLike({
+      postId,
+      targetUserId: props?.userId,
+      currentUserId: currentUser?.id,
+      currentLikesArray: safeLikes,
+      notificationId: existingLikeNotification?.id,
+    });
+  };
+
+  const safeSaved = Array.isArray(saved) ? saved : [];
+  const isSavedByMe = safeSaved.some((save) => save.userId === currentUser?.id);
+
+  const handleSave = async () => {
+    await toggleSave({
+      postId,
+      currentUserId: currentUser?.id,
+      currentSavedArray: safeSaved,
+    });
+  };
+
+  const webShare = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: `Publicación de @${username}`,
+          text: "¡Mira esta publicación, te puede interesar!",
+          url: `${window.location.origin}/${username}/post/${postId}`,
+        })
+        .then(() => console.log("Compartido con éxito"))
+        .catch((error) => console.error("Error al compartir:", error));
+    } else {
+      console.log("La API de Web Share no es compatible con este navegador.");
     }
   };
 
   return (
-    <div className="w-full p-2 md:p-4 flex items-center justify-between">
+    <div
+      className="w-full px-2 py-1.5 md:px-4 flex items-center justify-between"
+      id="comments"
+    >
       <div className="w-full flex items-center justify-start gap-1 md:gap-2">
         <Reactive
           counter={likes?.length}
-          active={lovedByUser}
+          active={isLikedByMe}
           color="text-rose-500"
-          // onClick={() => toggleLike(postId, currentUser?.id)}
-          onClick={() => giveLove(props.postId, props.userId, userId)}
+          onClick={handleLike}
+          title={isLikedByMe ? "Ya no me gusta" : "Me gusta"}
         >
-          {lovedByUser ? <HeartSolid /> : <HeartIcon strokeWidth={2} />}
+          <Heart
+            size={18}
+            className={isLikedByMe ? "fill-current" : "fill-none"}
+          />
         </Reactive>
         <Reactive
           counter={comments?.length}
-          onClick={() => navigate(`/${username}/post/${postId}`)}
+          onClick={() => navigate(`/${username}/post/${postId}#comments`)}
         >
           <ChatBubble strokeWidth={2} />
         </Reactive>
-        <div className="flex items-center justify-center relative">
+        <div className="relative flex items-center justify-center">
           <Reactive
             counter={reposts?.length}
             onClick={() => setIsOpenRepost((prev) => !prev)}
@@ -201,9 +164,9 @@ export default function PostAction(props) {
             <ArrowsRounded strokeWidth={2} />
           </Reactive>
           <MenuAlt
-            isOpen={isOpenRepost}
             ref={menuRepostRef}
-            className="z-5 bottom-[calc(100%_+_8px)]"
+            isOpen={isOpenRepost}
+            className="z-5 bottom-10.5"
           >
             <Nudge
               Icon={repost ? ArrowsRounded : ArrowsRounded}
@@ -213,17 +176,22 @@ export default function PostAction(props) {
                 setRepost(!repost);
                 setIsOpenRepost(false);
               }}
+              to={`/compose?repost=${postId}`}
             />
-            <Nudge Icon={ChatBubble} title="Citar" />
+            <Nudge
+              Icon={ChatBubble}
+              title="Citar"
+              to={`/compose?repost=${postId}`}
+            />
             {author && (
               <>
-                <hr className="my-1.5 border-dashed border-neutral-200 dark:border-neutral-800" />
+                <PageLine />
                 <Nudge Icon={ChatsBubble} title="Ver citas" />
               </>
             )}
           </MenuAlt>
         </div>
-        <div className="flex items-center justify-center relative">
+        <div className="relative flex items-center justify-center">
           <Reactive
             counter={shared?.length}
             onClick={() => setIsOpenShare((prev) => !prev)}
@@ -236,30 +204,37 @@ export default function PostAction(props) {
           <MenuAlt
             isOpen={isOpenShare}
             ref={menuShareRef}
-            className="z-5 bottom-[calc(100%_+_8px)]"
+            className="z-5 bottom-10.5"
           >
             <Nudge
               Icon={Link}
-              title="Copiar enlace"
               rotate={-45}
+              title="Copiar enlace"
               onClick={() =>
-                copyPostLink(username, postId) + setIsOpenShare(false)
+                copyPostLink(username, postId) + setIsOpenShare((prev) => !prev)
               }
             />
-            <Nudge Icon={Share} title="Compartir en otras apps" />
-            <Nudge Icon={Link} title="Enviar por mensaje directo" />
+            <Nudge
+              Icon={Share}
+              title="Compartir en otras apps"
+              onClick={() => webShare() + setIsOpenShare((prev) => !prev)}
+            />
           </MenuAlt>
         </div>
       </div>
       <div className="w-full flex items-center justify-end">
         <Reactive
           counter={saved?.length || 0}
-          active={saved}
+          active={isSavedByMe}
           color="text-sky-500"
-          // onClick={() => toggleSavePost(author?.id, postId)}
-          onClick={() => savePost(props?.postId, userId)}
+          onClick={handleSave}
+          title={isSavedByMe ? "Desguardar publicación" : "Guardar publicación"}
         >
-          {saved ? <BookmarkSolid /> : <BookmarkIcon strokeWidth={2} />}
+          {/* {isSavedByMe ? <BookmarkSolid /> : <BookmarkIcon strokeWidth={2} />} */}
+          <Bookmark
+            size={18}
+            className={isSavedByMe ? "fill-current" : "fill-none"}
+          />
         </Reactive>
       </div>
     </div>

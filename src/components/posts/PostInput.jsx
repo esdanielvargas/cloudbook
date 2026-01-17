@@ -1,20 +1,37 @@
+import { getAuth } from "firebase/auth";
+import { db, useUsers } from "../../hooks";
 import { useParams } from "react-router-dom";
-import { db, useAuth, useUsers } from "../../hooks";
-import Avatar from "../Avatar";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { doc, getDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { v4 } from "uuid";
+import Avatar from "../Avatar";
+import FormField from "../form/FormField";
+import { Button } from "../buttons";
 
 export default function PostInput() {
-  const auth = useAuth(db);
+  const auth = getAuth();
   const users = useUsers(db);
   const { postId } = useParams();
 
-  const user = users.find((user) => user?.uid === auth?.uid);
+  const user = users.find((user) => user?.uid === auth?.currentUser?.uid);
 
-  const { register, handleSubmit, reset } = useForm();
+  const { register, watch, handleSubmit, reset } = useForm();
+
+  const text = watch("text");
+
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data) => {
+    if (loading) return;
+
+    if (!data.text) {
+      alert("No puedes publicar un comentario sin texto.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const postRef = doc(db, "posts", postId);
       const postSnap = await getDoc(postRef);
@@ -39,38 +56,59 @@ export default function PostInput() {
       await updateDoc(postRef, {
         comments: [...currentComments, comment],
       });
-
-      console.log("Comentario enviado:", comment);
+      
       reset();
     } catch (error) {
       console.error("Error al guardar el comentario:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!postId || !user) return <div className="-mt-px" />;
+  if (!postId || !auth) return <div className="w-full" />;
 
   return (
-    <div className="w-full p-2 md:p-4 flex items-center gap-1 md:gap-2" id="comments">
-      <Avatar {...user} avatar={user?.avatar || user?.picture} />
+    <div
+      className="w-full px-2 py-2.5 md:px-4 flex items-center gap-1 md:gap-2"
+      id="comments"
+    >
+      <div className="relative flex items-center justify-center">
+        <Avatar
+          size={40}
+          {...user}
+          className="z-1"
+          avatar={user?.avatar}
+        />
+        <div
+          className={`inset-0 absolute z-2 flex items-center justify-center bg-neutral-50/50 dark:bg-neutral-950/50 transition-all duration-300 ease-out ${text?.length > 0 ? "visible opacity-100" : "invisible opacity-0"}`}
+        >
+          <span className="text-xs font-mono">
+            {text?.length > 0 ? text?.length : null}
+          </span>
+        </div>
+      </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="size-full flex items-center gap-1 md:gap-2"
+        className="size-full flex items-center justify-between gap-1 md:gap-2"
       >
-        <input
-          type="text"
+        <FormField
           id="comment"
           name="comment"
           placeholder="Añadir un comentario..."
-          className="w-full h-9 px-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-950/50 border border-neutral-200 dark:border-neutral-800 text-[10.5px] md:text-sm font-sans focus:outline"
-          {...register("text", { required: true })}
+          {...register("text", { required: true, maxLength: 280 })}
+          maxLength={280}
           required
         />
-        <button
+        <Button
           type="submit"
-          className="h-9 px-3.5 cursor-pointer rounded-xl bg-neutral-200 dark:bg-neutral-800 md:border border-neutral-300 dark:border-neutral-700 font-bold text-[11.5px] md:text-sm font-sans"
+          variant="follow"
+          disabled={loading}
+          className={`min-w-28! h-10! ${
+            loading ? "opacity-70 cursor-not-allowed" : ""
+          }`}
         >
-          Publicar
-        </button>
+          {loading ? "Publicando..." : "Publicar"}
+        </Button>
       </form>
     </div>
   );

@@ -17,10 +17,9 @@ import { copyPostLink } from "../../utils";
 import PageLine from "../PageLine";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../hooks";
-import { ToastContainer, toast } from "react-toastify";
 
 export default function PostHeader(props) {
-  const { postId, action = true, username, author } = props;
+  const { postId, action, username, author, repost } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
@@ -44,15 +43,7 @@ export default function PostHeader(props) {
   const changeStatus = async (status) => {
     // Validar que el ID de la publicación exista
     if (!props?.postId) return;
-    const postRef = doc(db, "photos", props.postId);
-
-    // Mapeo de mensajes para personalizar la notificación
-    const messages = {
-      public: "¡La publicación ahora es pública! 🌍",
-      archived: "Publicación archivada correctamente 🗄️",
-      deleted: "Se movió a la papelera 🗑️",
-      hidden: "Publicación ocultada 👁️‍🗨️",
-    };
+    const postRef = doc(db, "posts", props.postId);
 
     // Definir estados permitidos (seguridad extra)
     const validStatuses = ["public", "archived", "hidden", "deleted"];
@@ -63,22 +54,9 @@ export default function PostHeader(props) {
     }
 
     try {
-      // Una sola llamada para actualizar
       await updateDoc(postRef, { status: status });
-
-      toast.info(messages[status], {
-        position: "bottom-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
     } catch (error) {
       console.error("Error al cambiar el estado:", error);
-      toast.error("Error al actualizar. Intenta de nuevo.");
     }
   };
 
@@ -89,6 +67,7 @@ export default function PostHeader(props) {
         status={props?.status}
         authorId={props?.id}
         postId={postId}
+        action={action}
       />
       {action ? (
         <div className="w-full p-2 md:p-4 flex items-center justify-end relative">
@@ -107,7 +86,7 @@ export default function PostHeader(props) {
                 <Nudge
                   Icon={Edit}
                   title="Editar publicación"
-                  to={`/compose?post=${postId}`}
+                  to={repost ? `/compose?post=${postId}&repost=${repost}` : `/compose?post=${postId}`}
                 />
                 <Nudge
                   Icon={Archive}
@@ -167,18 +146,6 @@ export default function PostHeader(props) {
               onClick={() => copyPostLink(username, postId) + setIsOpen(false)}
             />
           </MenuAlt>
-          <ToastContainer
-            position="top-center"
-            autoClose={2000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick={false}
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-          />
         </div>
       ) : null}
     </div>
