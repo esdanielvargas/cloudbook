@@ -1,18 +1,31 @@
+import { db, usePosts, useUsers } from "../../hooks";
 import { useParams } from "react-router-dom";
-import { db, useAuth, usePosts, useUsers } from "../../hooks";
 import Post from "../Post";
+import { getAuth } from "firebase/auth";
 
 export default function ProfileSaved() {
-  const auth = useAuth(db);
+  const auth = getAuth();
   const users = useUsers(db);
   const posts = usePosts(db);
-  const { username } = useParams();
-  const userSelected = users.find((user) => user.username === username);
-  const currentUser = users.find((user) => user.email === auth?.email);
 
-  const postsFiltered = posts.filter(
-    (post) => Array.isArray(post.saved) && post.saved.includes(userSelected?.id)
+  const { username } = useParams();
+
+  const userSelected = users.find((user) => user?.username === username);
+  const currentUser = users.find(
+    (user) => user?.uid === auth?.currentUser?.uid
   );
+
+  const postsFiltered = posts.filter((post) => {
+    if (!Array.isArray(post.saved)) return false;
+
+    const isSavedByUser = post.saved.some(
+      (savedItem) => savedItem.id === userSelected?.id
+    );
+
+    const isPublic = post.status === "public";
+
+    return isSavedByUser && isPublic;
+  });
 
   return (
     <>
@@ -24,20 +37,17 @@ export default function ProfileSaved() {
               const user = users.find((u) => u.id === post.userId);
 
               return (
-                post.show && (
-                  <Post
-                    {...user}
-                    {...post}
-                    key={index}
-                    postId={post.id}
-                    authorId={user?.id}
-                  />
-                )
+                <Post
+                  {...user}
+                  {...post}
+                  key={post.id || index}
+                  postId={post.id}
+                  authorId={user?.id}
+                />
               );
             })
           ) : (
-            // <div className="code">Aún no hay publicaciones guardadas.</div>
-            <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
+            <div className="w-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
               <span className="text-xs md:text-sm text-neutral-400">
                 Aún no hay publicaciones guardadas en tú perfil.
               </span>
@@ -45,8 +55,7 @@ export default function ProfileSaved() {
           )}
         </div>
       ) : (
-        // <div className="code">No tienes acceso a está página.</div>
-        <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
+        <div className="w-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
           <span className="text-xs md:text-sm text-neutral-400">
             No tienes acceso a esta página.
           </span>

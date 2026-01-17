@@ -10,6 +10,8 @@ import {
   Link2,
   ListPlus,
   ListX,
+  Lock,
+  LockKeyhole,
   OctagonAlert,
   Rss,
   SquareKanban,
@@ -60,7 +62,7 @@ export default function Profile() {
 
   // Información del usuario logeado
   const currentUser = users.find(
-    (user) => user?.uid === auth?.currentUser?.uid
+    (user) => user?.uid === auth?.currentUser?.uid,
   );
 
   // Verificamos si el perfil es del usuario logeado
@@ -86,7 +88,7 @@ export default function Profile() {
         (notif) =>
           notif.targetUserId === targetUserId &&
           notif.currentUserId === currentUserId &&
-          notif.type === "follow"
+          notif.type === "follow",
       );
 
       if (isFollowing) {
@@ -134,7 +136,7 @@ export default function Profile() {
   // Filtramos las publicaciones que sean del usuario y que esten publicas
   const postsFiltered = posts
     .filter((post) => post.userId === user?.id)
-    .filter((post) => post?.show === true);
+    .filter((post) => post?.status === "public");
 
   // Definimos qué pasa al hacer click
   const handleOpenLinks = () => {
@@ -217,7 +219,7 @@ export default function Profile() {
             onClick: () => {
               setIsFavorited(!isFavorited);
               alert(
-                isFavorited ? "Eliminado de favoritos" : "Añadido a favoritos"
+                isFavorited ? "Eliminado de favoritos" : "Añadido a favoritos",
               );
             },
           },
@@ -227,7 +229,7 @@ export default function Profile() {
             onClick: () => {
               setIsFavorited(!isFavorited);
               alert(
-                isFavorited ? "Eliminado de una lista" : "Añadido a una lista"
+                isFavorited ? "Eliminado de una lista" : "Añadido a una lista",
               );
             },
           },
@@ -279,9 +281,9 @@ export default function Profile() {
       <div className="w-full flex flex-col items-center justify-start rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800/75">
         {/* Portada del perfil */}
         <div className="w-full h-36 min-h-36 md:h-50 md:min-h-50 relative flex items-center justify-center rounded-t-xl overflow-hidden bg-neutral-200/75 dark:bg-neutral-950/45 border-b border-neutral-200/75 dark:border-neutral-800/75">
-          {(user?.banner || user?.avatar) && (
+          {user?.banner && (
             <img
-              src={user?.banner || user?.avatar}
+              src={user?.banner}
               alt={`Portada de ${user?.name} (@${user?.username})`}
               title={`Portada de ${user?.name} (@${user?.username})`}
               loading="eager"
@@ -295,7 +297,7 @@ export default function Profile() {
               }}
             />
           )}
-          {!user?.banner && !user?.avatar && (
+          {!user?.banner && (
             <div className="inset-0 absolute backdrop-blur-sm">
               <img
                 src="/images/photo.png"
@@ -305,6 +307,7 @@ export default function Profile() {
             </div>
           )}
         </div>
+        {/* Información del perfil */}
         <div className="w-full p-2 md:p-4 flex flex-col items-center gap-2">
           {/* Foto de perfil y botones de acción */}
           <div className="w-full flex items-end justify-between">
@@ -314,6 +317,7 @@ export default function Profile() {
                 size={88}
                 action={false}
                 avatar={user?.avatar}
+                {...user}
                 className="size-22! md:size-26! rounded-3xl! md:rounded-4xl!"
               />
             </div>
@@ -379,17 +383,25 @@ export default function Profile() {
               <span className="font-bold text-xl">
                 {user?.name ? user?.name : "Display Name"}
               </span>
-              {user?.verified && (
+              {user?.verified?.status && (
                 <div className="-mb-0.5 flex items-center justify-center">
                   <BadgeCheck size={18} />
                 </div>
               )}
             </div>
             {/* Nombre de usuario */}
-            <div className="w-full flex items-center justify-start">
+            <div className="w-full flex items-center justify-start gap-1">
               <div className="text-sm text-neutral-600 dark:text-neutral-400">
                 @{user?.username ? user?.username : "username"}
               </div>
+              {isOwner && user?.private && (
+                <span
+                  className="-mt-0.5 flex items-center justify-center cursor-help"
+                  title="Perfil privado"
+                >
+                  <LockKeyhole size={14} />
+                </span>
+              )}
             </div>
             {/* Description */}
             <div className="w-full flex items-center justify-start gap-1">
@@ -504,7 +516,24 @@ export default function Profile() {
         </div>
       </div>
       <div className="size-full mt-1 mb-22 md:mb-4 rounded-xl overflow-hidden">
-        <Outlet />
+        {/* LÓGICA CORREGIDA */}
+        {isOwner || !user?.private || isFollowing ? (
+          // Si eres dueño, es público o lo sigues -> MUESTRA EL CONTENIDO
+          <Outlet />
+        ) : (
+          // Si no cumples lo anterior -> MUESTRA EL MENSAJE DE PRIVADO
+          <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
+            <div className="flex flex-col items-center gap-2">
+              <LockKeyhole size={24} className="text-neutral-500" />
+              <span className="text-xs md:text-sm text-neutral-400 font-medium">
+                Este perfil es privado.
+              </span>
+              <span className="text-[10px] md:text-xs text-neutral-500">
+                Sigue a este usuario para ver sus fotos y videos.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

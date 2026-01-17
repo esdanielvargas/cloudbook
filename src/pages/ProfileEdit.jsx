@@ -1,14 +1,22 @@
 import { getAuth } from "firebase/auth";
 import { PageBox, PageHeader, PageLine } from "../components";
-import { FormField } from "../components/form";
+import { FormField, FormInput } from "../components/form";
 import { db, useUsers } from "../hooks";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { Button } from "../components/buttons";
-import { Bolt, Settings2 } from "lucide-react";
+import { CloudUpload, Loader2, Mail, Save } from "lucide-react";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { storage } from "../firebase/config";
+import { v4 } from "uuid";
 
 export default function ProfileEdit() {
   const auth = getAuth();
@@ -16,32 +24,100 @@ export default function ProfileEdit() {
   const navigate = useNavigate();
   const { username } = useParams();
 
-  const { register, handleSubmit, setValue } = useForm();
+  const bannerInputRef = useRef(null);
+  const avatarInputRef = useRef(null);
 
+  const [uploadingField, setUploadingField] = useState(null);
+
+  const { register, handleSubmit, setValue } = useForm();
   const currentUser = users.find((user) => user.uid === auth?.currentUser?.uid);
 
-  const [isVerified, setIsVerified] = useState(currentUser?.verified);
-  const [isActive, setIsActive] = useState(currentUser?.menu);
-  const [isPublic, setIsPublic] = useState(currentUser?.public);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
       setValue("banner", currentUser?.banner || "");
       setValue("avatar", currentUser?.avatar || "");
-      setValue("name", currentUser?.name || "");
-      setValue("username", currentUser?.username || "");
       setValue("bio", currentUser?.bio || "");
-      setValue("website", currentUser?.website || "");
-      setValue("spotify", currentUser?.spotify || "");
-      setValue("youtube", currentUser?.youtube || "");
-      setValue("gender", currentUser?.gender || "");
-      setValue("birthdate", currentUser?.birthdate || "");
-      setValue("country", currentUser?.country || "");
       setValue("email", currentUser?.email || "");
-      setValue("id", currentUser?.id || "");
-      setValue("uid", currentUser?.uid || "");
+
+      setIsVerified(
+        typeof currentUser.verified === "object"
+          ? currentUser.verified.status
+          : currentUser.verified || false
+      );
+      setIsPrivate(currentUser.private || false);
     }
   }, [currentUser, setValue]);
+
+  const handleImageUpload = async (e, fieldName) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingField(fieldName);
+
+    const folderName = fieldName === "avatar" ? "profile" : "banner";
+
+    try {
+      const oldUrl = currentUser[fieldName];
+
+      if (oldUrl && oldUrl.includes("firebasestorage.googleapis.com")) {
+        try {
+          const oldFileRef = ref(storage, oldUrl);
+          await deleteObject(oldFileRef);
+        } catch (err) {
+          console.warn("No se pudo borrar la imagen anterior:", err);
+        }
+      }
+
+      const fileExtension = file.name.split(".").pop();
+      const newFileName = `${v4()}.${fileExtension}`;
+      const storagePath = `users/${currentUser.username}/${folderName}/${newFileName}`;
+
+      const fileRef = ref(storage, storagePath);
+      await uploadBytes(fileRef, file);
+      const downloadUrl = await getDownloadURL(fileRef);
+
+      // --- PASO 3: ACTUALIZAR FORMULARIO ---
+      setValue(fieldName, downloadUrl);
+    } catch (error) {
+      console.error("Error crítico al gestionar la imagen:", error);
+      alert("Hubo un error al subir la imagen.");
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      const userDocRef = doc(db, "users", currentUser?.id);
+
+      const verifiedObject = {
+        status: isVerified,
+        since: currentUser.verified?.since || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await updateDoc(userDocRef, {
+        banner: data.banner,
+        avatar: data.avatar,
+        bio: data.bio,
+        verified: verifiedObject,
+        private: isPrivate,
+      });
+
+      navigate(`/${username}`);
+    } catch (error) {
+      console.error("Error al actualizar el perfil:", error);
+      alert("Hubo un error al actualizar el perfil");
+    }
+  };
+
+  const triggerSubmit = () => {
+    const form = document.getElementById("profile-edit-form");
+    if (form) form.requestSubmit();
+  };
 
   if (!users || !auth) {
     return <p>Cargando...</p>;
@@ -51,107 +127,110 @@ export default function ProfileEdit() {
     <p>No se pudo encontrar tu perfil</p>;
   }
 
-  const onSubmit = async (data) => {
-    try {
-      const userDocRef = doc(db, "users", currentUser.id);
-      await updateDoc(userDocRef, {
-        banner: data.banner || currentUser.banner,
-        avatar: data.avatar || currentUser.avatar,
-        name: data.name || currentUser.name,
-        username: data.username || currentUser.username,
-        bio: data.bio === "" ? "" : data.bio || currentUser.bio,
-        website: data.website === "" ? "" : data.website || currentUser.website,
-        spotify: data.spotify === "" ? "" : data.spotify || currentUser.spotify,
-        youtube: data.youtube === "" ? "" : data.youtube || currentUser.youtube,
-        gender: data.gender || currentUser.gender,
-        birthdate: data.birthdate || currentUser.birthdate,
-        country: data.country || currentUser.country,
-        menu: isActive === false ? false : isActive || currentUser.menu,
-        verified:
-          isVerified === false ? false : isVerified || currentUser.verified,
-      });
-      navigate(`/${currentUser?.username}`)
-      // alert("Perfil actualizado con éxito");
-    } catch (error) {
-      console.error("Error al actualizar el perfil:", error);
-      alert("Hubo un error al actualizar el perfil");
-    }
-  };
-
   return (
     <>
-      <PageHeader title="Editar perfil" Icon={Settings2} />
+      <PageHeader
+        title="Editar perfil"
+        Icon={Save}
+        iconOnClick={triggerSubmit}
+      />
       <PageBox active>
         {currentUser?.username === username ? (
           <form
+            id="profile-edit-form"
             onSubmit={handleSubmit(onSubmit)}
             className="w-full flex flex-col gap-4"
           >
-            <FormField
-              label="Portada del perfil"
-              // value={currentUser?.banner}
-              {...register("banner")}
-            />
-            <FormField
-              label="Foto de perfil"
-              // value={currentUser?.avatar}
-              {...register("avatar")}
-            />
-            <FormField label="Nombre visible" {...register("name")} />
-            <FormField
-              label="Nombre de usuario"
-              readOnly
-              placeholder={`@${currentUser?.username}`}
-            />
+            <div className="w-full flex items-end gap-2">
+              <FormField
+                label="Portada del perfil"
+                text="Enlace de la portada del perfil"
+                placeholder={`https://storage.${username}.com/images/banner.png`}
+                {...register("banner")}
+              />
+              <input
+                type="file"
+                className="hidden"
+                ref={bannerInputRef}
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, "banner")}
+              />
+              <Button
+                variant="inactive"
+                title="Subir imagen"
+                className="px-2! min-w-10! min-h-10!"
+                onClick={() => bannerInputRef.current.click()}
+                disabled={uploadingField !== null}
+              >
+                {uploadingField === "banner" ? (
+                  <Loader2 className="animate-spin" size={20} />
+                ) : (
+                  <CloudUpload size={20} strokeWidth={1.5} />
+                )}
+              </Button>
+            </div>
+            <div className="w-full flex items-end gap-2">
+              <FormField
+                label="Foto de perfil"
+                text="Enlace de la foto del perfil"
+                placeholder={`https://storage.${username}.com/images/profile.png`}
+                {...register("avatar")}
+              />
+              <input
+                type="file"
+                className="hidden"
+                ref={avatarInputRef}
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, "avatar")}
+              />
+              <Button
+                variant="inactive"
+                title="Subir imagen"
+                className="px-2! min-w-10! min-h-10!"
+                onClick={() => avatarInputRef.current.click()}
+                disabled={uploadingField !== null}
+              >
+                {uploadingField === "avatar" ? (
+                  <Loader2 className="animate-spin" size={20} />
+                ) : (
+                  <CloudUpload size={20} strokeWidth={1.5} />
+                )}
+              </Button>
+            </div>
             <FormField
               label="Descripción corta"
-              text=""
+              text="Esta descripción corta aparecerá en tu perfil."
+              placeholder="Cuentanos de que trata este perfil."
               textarea
               rows={4}
               {...register("bio")}
               max={180}
             />
-            {/* <PageLine /> */}
-            {/* <FormField label="Sitio Web" {...register("website")} /> */}
-            {/* <FormField label="Spotify" {...register("spotify")} /> */}
-            {/* <FormField label="YouTube" {...register("youtube")} /> */}
             <PageLine />
+            {currentUser?.premium && (
+              <>
+                <FormField
+                  label="Mostrar insignia de verificación"
+                  text="Si esta opción está activada, se mostrará una insignia de verificación junto a tu nombre."
+                  boolean
+                  value={isVerified}
+                  onClick={() => setIsVerified(!isVerified)}
+                />
+              </>
+            )}
             <FormField
-              label="Mostrar insignia de verificación"
-              text="Si está activado, se mostrará una insignia de verificación junto a tu nombre de usuario."
+              label="Perfil privado"
+              text="Si esta opción está activada, se ocultará todo tu contenido a los usuarios que no te sigan."
               boolean
-              value={isVerified}
-              onClick={() => setIsVerified(!isVerified)}
-            />
-            <FormField
-              label="Mostrar avatar en el menú de navegación"
-              text="Si está activado, tu avatar se mostrará en el menú de navegación en lugar del icono de usuario predeterminado."
-              boolean
-              value={isActive}
-              onClick={() => setIsActive(!isActive)}
-            />
-            <FormField
-              label="Perfil público"
-              text="Si está activado, tu perfil será visible para otros usuarios y visitantes. Si está desactivado, solo tú y tus seguidores actuales podrán ver tu perfil."
-              boolean
-              value={isPublic}
-              onClick={() => setIsPublic(!isPublic)}
+              value={isPrivate}
+              onClick={() => setIsPrivate(!isPrivate)}
             />
             <PageLine />
-            <FormField
+            <FormInput
               label="Correo electrónico"
               readOnly
+              icon={<Mail size={20} strokeWidth={1.5} />}
               placeholder={currentUser?.email}
-            />
-            <FormField
-              label="ID de usuario"
-              readOnly
-              placeholder={currentUser?.id}
-            />
-            <FormField
-              label="UID de usuario"
-              readOnly
-              placeholder={currentUser?.uid}
             />
             <PageLine />
             <div className="w-full flex items-center justify-between gap-2">
@@ -163,13 +242,20 @@ export default function ProfileEdit() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="active" full>
-                Actualizar
+              <Button
+                type="submit"
+                variant="submit"
+                full
+                disabled={uploadingField !== null}
+              >
+                {uploadingField ? "Subiendo..." : "Actualizar"}
               </Button>
             </div>
           </form>
         ) : (
-          <div className="size-full"></div>
+          <div className="m-auto font-normal text-xs font-sans text-neutral-500 select-none pointer-events-none">
+            No tienes permiso para editar el perfil de otro usuario.
+          </div>
         )}
       </PageBox>
     </>
