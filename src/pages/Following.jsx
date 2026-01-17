@@ -12,7 +12,7 @@ export default function Following() {
   );
 
   const postsEnriched = posts
-    .filter((post) => post.show)
+    .filter((post) => post.show === true || post.status === "public")
     .filter((post) => currentUser?.following?.includes(post?.userId))
     .map((post) => {
       const user = users.find((u) => u.id === post.userId);

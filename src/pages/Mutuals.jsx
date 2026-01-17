@@ -12,7 +12,7 @@ export default function Mutuals() {
   );
 
   const postsEnriched = posts
-    .filter((post) => post.show)
+    .filter((post) => post?.show === true || post?.status === "public")
     .filter(
       (post) =>
         currentUser?.following?.includes(post?.userId) &&

@@ -8,7 +8,7 @@ export default function ForYou() {
   const posts = usePosts(db);
 
   const postsEnriched = posts
-    .filter((post) => post.show)
+    .filter((post) => post?.show === true || post?.status === "public")
     .map((post) => {
       const user = users.find((u) => u.id === post.userId);
       const isAuthor = auth.currentUser?.uid === user?.uid;
