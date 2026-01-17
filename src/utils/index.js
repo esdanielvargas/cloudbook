@@ -6,10 +6,13 @@ import { formatLink } from "./formatLink";
 import { cleanUrlParams } from "./cleanUrlParams";
 import { stripParamsAndWWW } from "./stripParamsAndWWW";
 import { accentHexMap } from "./accentHexMap";
-import { toggleCommentLike } from "./toggleCommentLike";
 import { copyPostLink } from "./copyPostLink";
 import { copyProfileLink } from "./copyProfileLink";
 import { getCountryName, getStateName, formatLocation } from "./location";
+import { toggleLike } from "./toggleLike";
+import { toggleSave } from "./toggleSave";
+import { likeComment } from "./likeComment";
+import { deleteComment } from "./deleteComment";
 
 export {
   abbrNumber,
@@ -20,10 +23,13 @@ export {
   cleanUrlParams,
   stripParamsAndWWW,
   accentHexMap,
-  toggleCommentLike,
   copyPostLink,
   copyProfileLink,
   getCountryName,
   getStateName,
   formatLocation,
+  toggleLike,
+  toggleSave,
+  likeComment,
+  deleteComment
 };
