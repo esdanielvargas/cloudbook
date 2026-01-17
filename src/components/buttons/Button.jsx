@@ -6,6 +6,7 @@ export default function Button({
   to,
   href,
   full,
+  type = "button",
   variant = "default",
   className = "",
   disabled = false,
@@ -34,6 +35,12 @@ export default function Button({
       "bg-neutral-100/75 hover:bg-neutral-200/75 dark:bg-neutral-800/75 hover:dark:bg-neutral-700/75 text-neutral-950 dark:text-white text-sm border border-neutral-300/50 dark:border-neutral-700/75",
     submit: `!min-w-24 ${bgClass} ${hoverClass} text-white ${borderClass}`,
   };
+
+  const types = {
+    button: "button",
+    submit: "submit",
+    reset: "reset"
+  }
 
   if (to) {
     return (
@@ -65,7 +72,7 @@ export default function Button({
 
   return (
     <button
-      type="button"
+      type={types[type]}
       className={`${base} ${variants[variant]} ${className} tracking-wide`}
       disabled={disabled}
       {...props}

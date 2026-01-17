@@ -8,7 +8,6 @@ const hashtagRegex = /#\w+/g;
 
 export const formatText = (text, users, premium = false) => {
   const parts = text?.split(urlRegex); // separar las URLs del texto
-  // const premium = author?.premium || false;
 
   return parts?.map((part, index) => {
     if (part.match(urlRegex)) {
@@ -22,15 +21,16 @@ export const formatText = (text, users, premium = false) => {
               rel="noopener noreferrer"
               className="active:underline hover:underline"
               style={{ color: "var(--accent-color)" }}
-              title={`CloudBook no garantiza la seguridad ni el contenido de este enlace externo. Ingresa bajo tu propio riesgo: ${stripParamsAndWWW(part)}`}
+              title={`CloudBook no garantiza la seguridad ni el contenido de este enlace externo. Ingresa bajo tu propio riesgo: ${stripParamsAndWWW(
+                part
+              )}`}
             >
               {stripParamsAndWWW(part)}
             </a>
           ) : (
             <span
               className="underline"
-              // title={`Este no es un enlace directo`}
-              // title={`Este enlace no está activo porque requiere una suscripción premium: ${stripParamsAndWWW(part)}`}
+              title="Solo los usuarios premium pueden compartir enlaces accesibles."
             >
               {stripParamsAndWWW(part)}
             </span>

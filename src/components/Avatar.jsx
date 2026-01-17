@@ -6,7 +6,7 @@ export default function Avatar({
   username = "username",
   action = true,
   className = "",
-  size = 36, // Tamaño por defecto en px
+  size = 36,
   postId,
   refId,
 }) {
