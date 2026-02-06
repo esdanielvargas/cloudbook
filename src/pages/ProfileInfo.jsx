@@ -9,66 +9,78 @@ export default function ProfileInfo() {
   const { username } = useParams();
   const user = users.find((user) => user?.username === username);
 
-  const since = user?.since
-    ? ` ${new Date(user?.since?.seconds * 1000).toLocaleDateString("es", {
+  const createdAt = user?.createdAt
+    ? ` ${new Date(user?.createdAt).toLocaleDateString("es", {
         day: "2-digit",
-        month: "short",
+        month: "long",
         year: "numeric",
       })}`
-    : "No verificado";
+    : "No especificado";
 
-  const birthdate = new Date(user?.birthdate.seconds * 1000).toLocaleDateString(
-    "es",
-    {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }
-  );
+  const birthdate = new Date(user?.birthdate).toLocaleDateString("es", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const age =
+    new Date().getFullYear() - new Date(user?.birthdate).getFullYear();
 
   const verified = user?.verified
     ? `Verificado desde ${new Date(
-        user?.verified_at?.seconds * 1000
+        user?.verified_at?.seconds * 1000,
       ).toLocaleDateString("es", { month: "short", year: "numeric" })}`
     : "No verificado";
 
   const tabs = [
     {
+      show: true,
       Icon: Calendar1,
       title: "Se unió el",
-      caption: since,
+      caption: createdAt,
     },
     {
+      show: true,
       Icon: MapPin,
       title: "Ubicación",
       caption: formatLocation(user?.location?.country, user?.location?.state),
     },
     {
+      show: true,
       Icon: CalendarHeart,
       title: "Fecha de nacimiento",
-      caption: `${birthdate}`,
+      caption: `${birthdate} (${age} años)`,
     },
-    { type: "divider" },
     {
+      show: true,
+      type: "divider",
+    },
+    {
+      show: verified,
       Icon: VerifiedIcon,
       title: "Verificado",
       caption: verified,
       path: "/upgrade?ref=profile_info",
     },
-    { type: "divider" },
+    {
+      show: true,
+      type: "divider",
+    },
   ];
 
   return (
     <>
       <PageHeader title="Información del perfil" />
       <PageBox active className="p-0! gap-0!">
-        {tabs.map((tab, index) =>
-          tab.type === "divider" ? (
-            <PageLine key={index} />
-          ) : (
-            <Tab key={index} {...tab} />
-          )
-        )}
+        {tabs
+          .filter((tab) => tab.show)
+          .map((tab, index) =>
+            tab.type === "divider" ? (
+              <PageLine key={index} />
+            ) : (
+              <Tab key={index} {...tab} />
+            ),
+          )}
       </PageBox>
     </>
   );
