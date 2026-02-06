@@ -1,3 +1,5 @@
+import { PublicRoute } from "./PublicRoute"
+import { ProtectedRoute } from "./ProtectedRoute";
 import Menu from "./Menu";
 import Main from "./Main";
 import MenuMobile from "./MenuMobile";
@@ -22,6 +24,8 @@ export * from "./posts";
 export * from "./profile";
 
 export {
+  PublicRoute,
+  ProtectedRoute,
   Menu,
   Main,
   MenuAlt,
