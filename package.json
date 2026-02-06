@@ -1,7 +1,7 @@
 {
   "name": "cloudbook",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,7 @@
     "@lucide/lab": "^0.1.2",
     "@supabase/supabase-js": "^2.89.0",
     "@tailwindcss/vite": "^4.1.10",
+    "country-state-city": "^3.2.1",
     "date-fns": "^4.1.0",
     "firebase": "^11.10.0",
     "lucide-react": "^0.509.0",

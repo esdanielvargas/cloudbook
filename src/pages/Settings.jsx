@@ -28,7 +28,7 @@ export default function Settings() {
       Icon: Languages,
       title: "Idiomas",
       caption: "Selecciona tu idioma preferido.",
-      path: "/settings/languages",
+      // path: "/settings/languages",
     },
     {
       Icon: Palette,
@@ -40,13 +40,13 @@ export default function Settings() {
       Icon: Accessibility,
       title: "Accessibilidad",
       caption: "Ajusta las opciones de accesibilidad.",
-      path: "/settings/accessibility",
+      // path: "/settings/accessibility",
     },
     {
       Icon: Bell,
       title: "Notificaciones",
       caption: "Administra tus preferencias de notificación.",
-      path: "/settings/notifications",
+      // path: "/settings/notifications",
     },
     { type: "divider" },
     {
