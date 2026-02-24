@@ -18,44 +18,17 @@
 }
 
 @layer utilities {
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        cursor: pointer;
-        border-radius: 9999px;
-        background-color: #303030;
+    .custom-scrollbar {
+        scrollbar-color: #868686 #242424;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-track {
-        border-radius: 18px;
-        background-color: #181818;
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 
-    @media screen and (max-width: 40rem) {
-        .custom-scrollbar {
-            -ms-overflow-style: none;
-            /* IE y Edge */
-            scrollbar-width: none;
-            /* Firefox */
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            display: none;
-            /* Chrome, Safari y Opera */
-        }
-    }
-
-    @media screen and (max-width: 96rem) {
-        .custom-scrollbar {
-            -ms-overflow-style: none;
-            /* IE y Edge */
-            scrollbar-width: 0;
-            /* Firefox */
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            display: flex;
-            height: 8px;
-            /* Chrome, Safari y Opera */
-        }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
     }
 }
 

@@ -1,6 +1,8 @@
 import { getAuth } from "firebase/auth";
 import { db, usePosts, useUsers } from "../hooks";
 import Post from "../components/Post";
+import { EmptyState } from "@/components";
+import { UserCheck } from "lucide-react";
 
 export default function Following() {
   const auth = getAuth();
@@ -8,7 +10,7 @@ export default function Following() {
   const posts = usePosts(db);
 
   const currentUser = users.find(
-    (user) => user?.uid === auth?.currentUser?.uid
+    (user) => user?.uid === auth?.currentUser?.uid,
   );
 
   const postsEnriched = posts
@@ -28,9 +30,17 @@ export default function Following() {
 
   return (
     <>
-      {postsEnriched.map((post) => (
-        <Post key={post.postId} {...post} />
-      ))}
+      {postsEnriched?.length > 0 ? (
+        postsEnriched.map((post) => <Post key={post.postId} {...post} />)
+      ) : (
+        <EmptyState
+          Icon={UserCheck}
+          title={"No hay publicaciones recientes"}
+          caption={"Las personas que sigues no han publicado nada nuevo. ¡Busca más perfiles interesantes!"}
+          path={"/search"}
+          actionText={"Buscar usuarios"}
+        />
+      )}
     </>
   );
 }

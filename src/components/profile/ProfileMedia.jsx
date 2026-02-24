@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { db, usePosts, useUsers } from "../../hooks";
+import { db, usePosts, useUsers } from "@/hooks";
 import { PlayIcon } from "@heroicons/react/24/solid";
 import { ImagesIcon } from "lucide-react";
 import MediaItem from "./MediaItem";
@@ -26,7 +26,7 @@ export default function ProfileMedia() {
   );
 
   // Filtramos solo los posts publicos
-  const statusPosts = mediaPosts.filter((post) => post?.show === true);
+  const statusPosts = mediaPosts.filter((post) => post?.status === "public");
 
   // Ordenamos del más nuevo al más viejo (asumimos que hay una propiedad post.createdAt)
   const sortedMedia = [...statusPosts].sort((a, b) => a.posted - b.posted);

@@ -14,6 +14,12 @@ export default function SettingsAbout() {
     },
     {
       Icon: Code,
+      title: "Código abierto",
+      caption: "Ir al repositorio en GitHub.",
+      href: "https://github.com/esdanielvargas/cloudbook",
+    },
+    {
+      Icon: Code,
       title: "Desarrollador",
       caption: "Diseñado y construido por @danielvargas.",
       href: "https://danielvargas.dev?utm_source=cloudbook_app&utm_medium=settings_about&utm_campaign=cloudbook&utm_content=developer_link&utm_term=danielvargas&utm_id=cloudbook_app",
@@ -23,19 +29,19 @@ export default function SettingsAbout() {
       Icon: FileText,
       title: "Términos de servicio",
       caption: "Lee nuestros términos de servicio.",
-      href: "/legal/terms",
+      // href: "/legal/terms",
     },
     {
       Icon: FileText,
       title: "Política de privacidad",
       caption: "Lee nuestra política de privacidad.",
-      href: "/legal/privacy",
+      // href: "/legal/privacy",
     },
     {
       Icon: FileText,
       title: "Normas de la comunidad",
       caption: "Lee nuestras normas de la comunidad.",
-      href: "/legal/community-guidelines",
+      // href: "/legal/community-guidelines",
     },
     { type: "divider" },
   ];

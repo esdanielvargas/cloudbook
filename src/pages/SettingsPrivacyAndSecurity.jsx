@@ -16,19 +16,19 @@ export default function SettingsPrivacyAndSecurity() {
       Icon: ShieldCheck,
       title: "Autenticación de doble factor (2FA)",
       caption: "Añade una capa extra de seguridad a tu cuenta.",
-      path: "/settings/2fa",
+      // path: "/settings/2fa",
     },
     {
       Icon: Users,
       title: "Gestión de accesos (Roles)",
       caption: "Da acceso a tu cuenta a usuarios de confianza.",
-      path: "/settings/manage-accesses",
+      // path: "/settings/manage-accesses",
     },
     {
       Icon: History,
       title: "Historial de acceso a la cuenta",
       caption: "Revisa el historial de accesos a tu cuenta.",
-      path: "/settings/login-history",
+      // path: "/settings/login-history",
     },
     { type: "divider" },
     {
@@ -36,27 +36,27 @@ export default function SettingsPrivacyAndSecurity() {
       title: "Perfil privado",
       caption:
         "Haz que solo tus seguidores puedan interactuar con tu contenido.",
-      path: "/settings/account-privacy",
+      // path: "/settings/account-privacy",
     },
     {
       Icon: AtSign,
       title: "Menciones y etiquetas",
       caption:
         "Controla quién puede mencionarte o etiquetarte en publicaciones.",
-      path: "/settings/mentions-and-tags",
+      // path: "/settings/mentions-and-tags",
     },
     { type: "divider" },
     {
       Icon: VolumeOff,
       title: "Cuentas silenciadas",
       caption: "Gestiona las cuentas que has silenciado.",
-      path: "/settings/muted-accounts",
+      // path: "/settings/muted-accounts",
     },
     {
       Icon: UserX,
       title: "Cuentas bloqueadas",
       caption: "Gestiona las cuentas que has bloqueado.",
-      path: "/settings/blocked-accounts",
+      // path: "/settings/blocked-accounts",
     },
     { type: "divider" },
   ];

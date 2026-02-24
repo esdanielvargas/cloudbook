@@ -21,7 +21,7 @@ export default function FormField(props) {
     className = "",
     boolean,
     onClick,
-    // isActive,
+    error,
     ...rest
   } = props;
 
@@ -149,6 +149,12 @@ export default function FormField(props) {
           className={`w-full h-10 px-3.5 text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 text-neutral-950 dark:text-neutral-50 border border-neutral-200 dark:border-neutral-800 focus:outline-none ${className}`}
           {...rest}
         />
+      )}
+
+      {error && (
+        <div className="w-full flex items-center justify-start">
+          <span className="text-xs text-rose-600">{error}</span>
+        </div>
       )}
     </div>
   );

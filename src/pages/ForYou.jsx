@@ -1,6 +1,8 @@
-import { db, usePosts, useUsers } from "../hooks";
+import { db, usePosts, useUsers } from "@/hooks";
 import { getAuth } from "firebase/auth";
-import Post from "../components/Post";
+import Post from "@/components/Post";
+import { UserCheck } from "lucide-react";
+import { EmptyState } from "@/components";
 
 export default function ForYou() {
   const auth = getAuth();
@@ -23,9 +25,17 @@ export default function ForYou() {
 
   return (
     <>
-      {postsEnriched.map((post) => (
-        <Post key={post.postId} {...post} />
-      ))}
+      {postsEnriched?.length > 0 ? (
+        postsEnriched.map((post) => <Post key={post.postId} {...post} />)
+      ) : (
+        <EmptyState
+          Icon={UserCheck}
+          title={"No hay publicaciones recientes"}
+          caption={"Las personas que sigues no han publicado nada nuevo. ¡Busca más perfiles interesantes!"}
+          path={"/search"}
+          actionText={"Buscar usuarios"}
+        />
+      )}
     </>
   );
 }

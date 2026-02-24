@@ -13,6 +13,7 @@ import { toggleLike } from "./toggleLike";
 import { toggleSave } from "./toggleSave";
 import { likeComment } from "./likeComment";
 import { deleteComment } from "./deleteComment";
+import { formatPhoneNumber } from "./formatPhoneNumber";
 
 export {
   abbrNumber,
@@ -31,5 +32,6 @@ export {
   toggleLike,
   toggleSave,
   likeComment,
-  deleteComment
+  deleteComment,
+  formatPhoneNumber,
 };

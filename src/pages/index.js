@@ -6,7 +6,8 @@ import Following from "./Following";
 import Favorites from "./Favorites";
 import Mutuals from "./Mutuals";
 import Feeds from "./Feeds";
-import FeedCreate from "./FeedCreate";
+import FeedsReorder from "./FeedsReorder";
+import FeedForm from "./FeedForm";
 import CustomFeed from "./CustomFeed";
 import Search from "./Search";
 import SearchMain from "./SearchMain";
@@ -27,9 +28,13 @@ import PagePostActivity from "./PagePostActivity";
 import PagePostActivityUsers from "./PagePostActivityUsers";
 import NoFound from "./NoFound";
 import Settings from "./Settings";
-import SettingsAccount from "./SettingsAccount";
-import SettingsAccountUsername from "./SettingsAccountUsername";
-import SettingsAccountLocation from "./SettingsAccountLocation";
+import Account from "./Account";
+import AccountUsername from "./AccountUsername";
+import AccountEmail from "./AccountEmail";
+import AccountLocation from "./AccountLocation";
+import AccountGender from "./AccountGender";
+import AccountBirthdate from "./AccountBirthdate";
+import AccountDelete from "./AccountDelete";
 import SettingsPrivacyAndSecurity from "./SettingsPrivacyAndSecurity";
 import SettingsAbout from "./SettingsAbout";
 import Appearance from "./Appearance";
@@ -37,6 +42,7 @@ import Preferences from "./Preferences";
 import PreferencesUsers from "./PreferencesUsers";
 import PreferencesTopics from "./PreferencesTopics";
 import PreferencesHashtags from "./PreferencesHashtags";
+import AuthAction from "./AuthAction";
 
 export {
   Login,
@@ -47,7 +53,8 @@ export {
   Favorites,
   Mutuals,
   Feeds,
-  FeedCreate,
+  FeedsReorder,
+  FeedForm,
   CustomFeed,
   Search,
   SearchMain,
@@ -68,9 +75,13 @@ export {
   PagePostActivityUsers,
   NoFound,
   Settings,
-  SettingsAccount,
-  SettingsAccountUsername,
-  SettingsAccountLocation,
+  Account,
+  AccountUsername,
+  AccountEmail,
+  AccountLocation,
+  AccountGender,
+  AccountBirthdate,
+  AccountDelete,
   SettingsPrivacyAndSecurity,
   SettingsAbout,
   Appearance,
@@ -78,4 +89,5 @@ export {
   PreferencesUsers,
   PreferencesTopics,
   PreferencesHashtags,
+  AuthAction,
 };

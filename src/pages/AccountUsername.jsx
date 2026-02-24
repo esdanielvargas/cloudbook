@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { doc, Timestamp, updateDoc } from "firebase/firestore";
 
-export default function SettingsAccountUsername() {
+export default function AccountUsername() {
   const auth = getAuth();
   const users = useUsers(db);
   const currentUser = users.find((user) => user?.uid === auth.currentUser?.uid);

@@ -45,7 +45,7 @@ export default function ProfileEdit() {
       setIsVerified(
         typeof currentUser.verified === "object"
           ? currentUser.verified.status
-          : currentUser.verified || false
+          : currentUser.verified || false,
       );
       setIsPrivate(currentUser.private || false);
     }
@@ -139,100 +139,102 @@ export default function ProfileEdit() {
           <form
             id="profile-edit-form"
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full flex flex-col gap-4"
+            className="size-full flex flex-col justify-between gap-4"
           >
-            <div className="w-full flex items-end gap-2">
-              <FormField
-                label="Portada del perfil"
-                text="Enlace de la portada del perfil"
-                placeholder={`https://storage.${username}.com/images/banner.png`}
-                {...register("banner")}
-              />
-              <input
-                type="file"
-                className="hidden"
-                ref={bannerInputRef}
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, "banner")}
-              />
-              <Button
-                variant="inactive"
-                title="Subir imagen"
-                className="px-2! min-w-10! min-h-10!"
-                onClick={() => bannerInputRef.current.click()}
-                disabled={uploadingField !== null}
-              >
-                {uploadingField === "banner" ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <CloudUpload size={20} strokeWidth={1.5} />
-                )}
-              </Button>
-            </div>
-            <div className="w-full flex items-end gap-2">
-              <FormField
-                label="Foto de perfil"
-                text="Enlace de la foto del perfil"
-                placeholder={`https://storage.${username}.com/images/profile.png`}
-                {...register("avatar")}
-              />
-              <input
-                type="file"
-                className="hidden"
-                ref={avatarInputRef}
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, "avatar")}
-              />
-              <Button
-                variant="inactive"
-                title="Subir imagen"
-                className="px-2! min-w-10! min-h-10!"
-                onClick={() => avatarInputRef.current.click()}
-                disabled={uploadingField !== null}
-              >
-                {uploadingField === "avatar" ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <CloudUpload size={20} strokeWidth={1.5} />
-                )}
-              </Button>
-            </div>
-            <FormField
-              label="Descripción corta"
-              text="Esta descripción corta aparecerá en tu perfil."
-              placeholder="Cuentanos de que trata este perfil."
-              textarea
-              rows={4}
-              {...register("bio")}
-              max={180}
-            />
-            <PageLine />
-            {currentUser?.premium && (
-              <>
+            <div className="w-flex flex flex-col gap-4">
+              <div className="w-full flex items-end gap-2">
                 <FormField
-                  label="Mostrar insignia de verificación"
-                  text="Si esta opción está activada, se mostrará una insignia de verificación junto a tu nombre."
-                  boolean
-                  value={isVerified}
-                  onClick={() => setIsVerified(!isVerified)}
+                  label="Portada del perfil"
+                  text="Enlace de la portada del perfil"
+                  placeholder={`https://storage.${username}.com/images/banner.png`}
+                  {...register("banner")}
                 />
-              </>
-            )}
-            <FormField
-              label="Perfil privado"
-              text="Si esta opción está activada, se ocultará todo tu contenido a los usuarios que no te sigan."
-              boolean
-              value={isPrivate}
-              onClick={() => setIsPrivate(!isPrivate)}
-            />
-            <PageLine />
-            <FormInput
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={bannerInputRef}
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "banner")}
+                />
+                <Button
+                  variant="inactive"
+                  title="Subir imagen"
+                  className="px-2! min-w-10! min-h-10!"
+                  onClick={() => bannerInputRef.current.click()}
+                  disabled={uploadingField !== null}
+                >
+                  {uploadingField === "banner" ? (
+                    <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                    <CloudUpload size={20} strokeWidth={1.5} />
+                  )}
+                </Button>
+              </div>
+              <div className="w-full flex items-end gap-2">
+                <FormField
+                  label="Foto de perfil"
+                  text="Enlace de la foto del perfil"
+                  placeholder={`https://storage.${username}.com/images/profile.png`}
+                  {...register("avatar")}
+                />
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={avatarInputRef}
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "avatar")}
+                />
+                <Button
+                  variant="inactive"
+                  title="Subir imagen"
+                  className="px-2! min-w-10! min-h-10!"
+                  onClick={() => avatarInputRef.current.click()}
+                  disabled={uploadingField !== null}
+                >
+                  {uploadingField === "avatar" ? (
+                    <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                    <CloudUpload size={20} strokeWidth={1.5} />
+                  )}
+                </Button>
+              </div>
+              <FormField
+                label="Descripción corta"
+                text="Esta descripción corta aparecerá en tu perfil."
+                placeholder="Cuentanos de que trata este perfil."
+                textarea
+                rows={4}
+                {...register("bio")}
+                max={180}
+              />
+              <PageLine />
+              {currentUser?.premium && (
+                <>
+                  <FormField
+                    label="Mostrar insignia de verificación"
+                    text="Si esta opción está activada, se mostrará una insignia de verificación junto a tu nombre."
+                    boolean
+                    value={isVerified}
+                    onClick={() => setIsVerified(!isVerified)}
+                  />
+                </>
+              )}
+              <FormField
+                label="Perfil privado"
+                text="Si esta opción está activada, se ocultará todo tu contenido a los usuarios que no te sigan."
+                boolean
+                value={isPrivate}
+                onClick={() => setIsPrivate(!isPrivate)}
+              />
+              {/* <PageLine /> */}
+              {/* <FormInput
               label="Correo electrónico"
               readOnly
               icon={<Mail size={20} strokeWidth={1.5} />}
               placeholder={currentUser?.email}
-            />
+            /> */}
             <PageLine />
+            </div>
             <div className="w-full flex items-center justify-between gap-2">
               <Button
                 type="button"
