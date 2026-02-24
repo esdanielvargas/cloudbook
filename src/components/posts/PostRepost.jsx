@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { db, usePosts, useUsers } from "../../hooks";
+import { db, usePosts, useUsers } from "@/hooks";
 import PostContent from "./PostContent";
 import PostHeader from "./PostHeader";
 import PostText from "./PostText";
