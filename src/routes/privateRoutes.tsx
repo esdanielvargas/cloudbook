@@ -1,6 +1,6 @@
-import { AppLayout } from "../layouts";
-import { ProfileMedia, ProfileMusic, ProfilePosts, ProfileReposts, ProfileSaved } from "../components";
-import { Account, AccountBirthdate, AccountDelete, AccountEmail, AccountGender, AccountLocation, AccountUsername, Appearance, Chats, Compose, Favorites, Following, ForYou, Home, Mutuals, NoFound, Notify, PagePost, PagePostActivity, PagePostActivityUsers, Profile, ProfileArchive, ProfileEdit, ProfileFollowers, ProfileFollowing, ProfileInfo, ProfileTrashCan, Search, Settings, SettingsAbout, SettingsPrivacyAndSecurity } from "../pages";
+import { AppLayout } from "@/layouts";
+import { ProfileMedia, ProfileMusic, ProfilePosts, ProfileReposts, ProfileSaved } from "@/components";
+import { Account, AccountBirthdate, AccountDelete, AccountEmail, AccountGender, AccountLocation, AccountUsername, Appearance, Chats, Compose, CustomFeed, Favorites, FeedForm, Feeds, FeedsReorder, Following, ForYou, Home, Mutuals, NoFound, Notify, PagePost, PagePostActivity, PagePostActivityUsers, Profile, ProfileArchive, ProfileEdit, ProfileFollowers, ProfileFollowing, ProfileInfo, ProfileTrashCan, Search, Settings, SettingsAbout, SettingsPrivacyAndSecurity } from "@/pages";
 import { Navigate } from "react-router-dom";
 
 export const privateRoutes = [
@@ -17,8 +17,14 @@ export const privateRoutes = [
                     { path: "following", element: <Following /> },
                     { path: "favorites", element: <Favorites /> },
                     { path: "mutuals", element: <Mutuals /> },
+                    { path: "lists/:feedId", element: <CustomFeed /> },
                 ]
             },
+            { path: "lists", element: <Feeds /> },
+            { path: "lists/reorder", element: <FeedsReorder /> },
+            { path: "lists/new", element: <FeedForm /> },
+            { path: "lists/:feedId/edit", element: <FeedForm /> },
+            { path: "saved", element: <Navigate to="/" replace /> },
             { path: "search", element: <Search /> },
             { path: "compose", element: <Compose /> },
             { path: "chats", element: <Chats /> },
@@ -58,7 +64,6 @@ export const privateRoutes = [
             { path: "settings/privacy-and-security", element: <SettingsPrivacyAndSecurity /> },
             { path: "settings/appearance", element: <Appearance /> },
             { path: "settings/about", element: <SettingsAbout /> },
-            { path: "/feeds", element: <Navigate to={"/"} /> },
             { path: "/upgrade", element: <Navigate to={"/"} /> },
             { path: "/login", element: <Navigate to={"/"} /> },
             { path: "/register", element: <Navigate to={"/"} /> },
