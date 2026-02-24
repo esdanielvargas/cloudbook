@@ -1,6 +1,8 @@
 import { getAuth } from "firebase/auth";
 import { db, usePosts, useUsers } from "../hooks";
 import Post from "../components/Post";
+import { EmptyState } from "@/components";
+import { Bookmark, Star } from "lucide-react";
 
 export default function Favorites() {
   const auth = getAuth();
@@ -8,7 +10,7 @@ export default function Favorites() {
   const posts = usePosts(db);
 
   const currentUser = users.find(
-    (user) => user?.uid === auth?.currentUser?.uid
+    (user) => user?.uid === auth?.currentUser?.uid,
   );
 
   const postsEnriched = posts
@@ -28,9 +30,19 @@ export default function Favorites() {
 
   return (
     <>
-      {postsEnriched.map((post) => (
-        <Post key={post.postId} {...post} />
-      ))}
+      {postsEnriched?.length > 0 ? (
+        postsEnriched.map((post) => <Post key={post.postId} {...post} />)
+      ) : (
+        <EmptyState
+          Icon={Star}
+          title={"Aún no tienes favoritos"}
+          caption={
+            "Toca el ícono de guardado en las publicaciones que más te gusten para tenerlas siempre a la mano."
+          }
+          path={"/"}
+          actionText={"Explorar el Inicio"}
+        />
+      )}
     </>
   );
 }

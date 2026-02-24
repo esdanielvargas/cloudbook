@@ -21,6 +21,7 @@ export default function UserCard({
   show_followers = false,
   action,
   showFollowButton = false,
+  className = "",
 }) {
   const auth = getAuth();
   const users = useUsers(db);
@@ -64,7 +65,7 @@ export default function UserCard({
   const noFollow = currentUser?.uid === targetId;
 
   return (
-    <div className="w-full p-2 md:p-4 flex items-center justify-between gap-2">
+    <div className={`w-full p-2 md:p-4 flex items-center justify-between gap-2 ${className}`}>
       <div className="w-full flex items-center gap-2 md:gap-3">
         <Avatar
           avatar={avatar}
