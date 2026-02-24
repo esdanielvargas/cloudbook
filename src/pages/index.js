@@ -6,7 +6,8 @@ import Following from "./Following";
 import Favorites from "./Favorites";
 import Mutuals from "./Mutuals";
 import Feeds from "./Feeds";
-import FeedCreate from "./FeedCreate";
+import FeedsReorder from "./FeedsReorder";
+import FeedForm from "./FeedForm";
 import CustomFeed from "./CustomFeed";
 import Search from "./Search";
 import SearchMain from "./SearchMain";
@@ -52,7 +53,8 @@ export {
   Favorites,
   Mutuals,
   Feeds,
-  FeedCreate,
+  FeedsReorder,
+  FeedForm,
   CustomFeed,
   Search,
   SearchMain,
