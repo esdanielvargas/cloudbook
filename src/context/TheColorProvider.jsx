@@ -22,14 +22,19 @@ export function ThemeColorProvider({ children }) {
   }, [accent, colors]);
 
   const value = {
+    setAccent,
     accent: colors[accent].name,
     displayName: colors[accent].displayName,
-    setAccent,
     accentHex: colors[accent].hex,
     bgClass: colors[accent].bgClass,
+    bgTransluce: colors[accent].bgTransluce,
+    bgTransluce20: colors[accent].bgTransluce20,
     hoverClass: colors[accent].hoverClass,
+    hoverTransluce: colors[accent].hoverTransluce,
     txtClass: colors[accent].txtClass,
+    txtTransluce: colors[accent].txtTransluce,
     borderClass: colors[accent].borderClass,
+    borderTransluce: colors[accent].borderTransluce,
   };
 
   return (
