@@ -22,19 +22,19 @@ import {
   UserX,
   VolumeOff,
 } from "lucide-react";
-import { Avatar, PageHeader } from "../components";
+import { Avatar, EmptyState, PageHeader } from "@/components";
 import { Link, Outlet, useParams } from "react-router-dom";
-import { db, useNotify, usePosts, useUsers } from "../hooks";
+import { db, useNotify, usePosts, useUsers } from "@/hooks";
 import {
   ArrowPathRoundedSquareIcon,
   BookmarkIcon,
   HeartIcon,
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
-import { abbrNumber, cleanUrlParams, copyProfileLink } from "../utils";
+import { abbrNumber, cleanUrlParams, copyProfileLink } from "@/utils";
 import { useState } from "react";
-import { Button } from "../components/buttons";
-import { useThemeColor } from "../context";
+import { Button } from "@/components/buttons";
+import { useThemeColor } from "@/context";
 import { getAuth } from "firebase/auth";
 import {
   doc,
@@ -46,7 +46,7 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { useLinksModal } from "../context/ModalProvider";
+import { useLinksModal } from "@/context/ModalProvider";
 
 export default function Profile() {
   const auth = getAuth();
@@ -210,6 +210,7 @@ export default function Profile() {
     <>
       <PageHeader
         title={user?.name}
+        header={`${currentUser?.name} (@${currentUser?.username}) ~ CloudBook`}
         Icon={EllipsisVertical}
         iconTitle="Más opciones"
         menuOptions={[
@@ -516,23 +517,14 @@ export default function Profile() {
         </div>
       </div>
       <div className="size-full mt-1 mb-22 md:mb-4 rounded-xl overflow-hidden">
-        {/* LÓGICA CORREGIDA */}
         {isOwner || !user?.private || isFollowing ? (
-          // Si eres dueño, es público o lo sigues -> MUESTRA EL CONTENIDO
           <Outlet />
         ) : (
-          // Si no cumples lo anterior -> MUESTRA EL MENSAJE DE PRIVADO
-          <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
-            <div className="flex flex-col items-center gap-2">
-              <LockKeyhole size={24} className="text-neutral-500" />
-              <span className="text-xs md:text-sm text-neutral-400 font-medium">
-                Este perfil es privado.
-              </span>
-              <span className="text-[10px] md:text-xs text-neutral-500">
-                Sigue a este usuario para ver sus fotos y videos.
-              </span>
-            </div>
-          </div>
+          <EmptyState
+          Icon={LockKeyhole}
+          title={"Contenido exclusivo para seguidores"}
+          caption={"Haz clic en «Seguir» para conectar con este perfil y no perderte ninguna de sus actualizaciones."}
+        />
         )}
       </div>
     </>

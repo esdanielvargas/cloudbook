@@ -1,14 +1,13 @@
 import {
-  AppWindow,
+  Bookmark,
   Icon,
-  Info,
-  Languages,
+  LifeBuoy,
   LogIn,
   LogOut,
+  MessageSquareWarning,
+  Newspaper,
   Palette,
-  Rss,
   Settings,
-  TriangleAlert,
 } from "lucide-react";
 import { featherPlus } from "@lucide/lab";
 import {
@@ -23,60 +22,26 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Bubbly, Nudge } from "./buttons";
 import { db, useUsers } from "../hooks";
-import { getAuth, signOut, } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import MenuAlt from "./MenuAlt";
 import { useEffect, useRef, useState } from "react";
-// import supabase from "../utils/supabase";
+import PageLine from "./PageLine";
 
 export default function Menu() {
   const auth = getAuth();
   const users = useUsers(db);
   const navigate = useNavigate();
 
-  const user = users.find((user) => user.email === auth.currentUser?.email);
+  const user = users.find((user) => user.email === auth?.currentUser?.email);
 
-  // const [session, setSession] = useState(null);
-
-  // useEffect(() => {
-  //   // 1. Verificamos si ya hay sesión activa al cargar la página
-  //   supabase.auth.getSession().then(({ data: { session } }) => {
-  //     setSession(session);
-  //   });
-
-  //   // 2. "Escuchamos" cambios (Login, Logout, etc.) automáticamente
-  //   const {
-  //     data: { subscription },
-  //   } = supabase.auth.onAuthStateChange((_event, session) => {
-  //     setSession(session);
-  //   });
-
-  //   // Limpieza al desmontar
-  //   return () => subscription.unsubscribe();
-  // }, []);
 
   const ComposeIcon = (props) => (
     <Icon iconNode={featherPlus} {...props} strokeWidth={1.5} />
   );
 
-  // const handleSignOut = async () => {
-  //   try {
-  //     const { error } = await supabase.auth.signOut();
-
-  //     if (error) throw error;
-
-  //     console.log("Cierre de sesión exitoso");
-      
-  //     navigate("/login");
-      
-  //   } catch (error) {
-  //     console.error("Error al cerrar la sesión:", error.message);
-  //   }
-  // };
-
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      console.log("Cierre de sesión exitoso");
       navigate("/login");
     } catch (error) {
       console.error("Error al cerrar la sesión", error);
@@ -134,7 +99,6 @@ export default function Menu() {
             title="Componer"
             path="/compose"
             active={true}
-            // bgColor={`${bgClass} ${hoverClass}`}
           />
           {/* <Bubbly
             Icon={ChatBubbleBottomCenterIcon}
@@ -149,10 +113,9 @@ export default function Menu() {
             isAvatar={user?.menu}
             path={`/${user ? user?.username : "login"}`}
           />
-          {/* <Bubbly /> */}
         </nav>
       </div>
-      {/*  */}
+      {/* Menu Alt */}
       <div className="w-full flex flex-col items-center justify-end mb-2.5">
         <Bubbly
           Icon={Bars3Icon}
@@ -165,27 +128,22 @@ export default function Menu() {
           className="left-full ml-4 bottom-0"
         >
           <Nudge
-            Icon={Rss}
-            title="Feeds"
-            to="/feeds"
+            Icon={Newspaper}
+            title="Listas"
+            to="/lists"
             onClick={() => setIsOpen(false)}
           />
           <Nudge
-            Icon={Languages}
-            title="Idiomas"
-            to="/settings/languages"
+            Icon={Bookmark}
+            title="Guardados"
+            to="/saved"
             onClick={() => setIsOpen(false)}
           />
+          <PageLine />
           <Nudge
             Icon={Palette}
             title="Apariencia"
             to="/settings/appearance"
-            onClick={() => setIsOpen(false)}
-          />
-          <Nudge
-            Icon={Info}
-            title="Información"
-            to="/settings/about"
             onClick={() => setIsOpen(false)}
           />
           <Nudge
@@ -194,12 +152,20 @@ export default function Menu() {
             to="/settings"
             onClick={() => setIsOpen(false)}
           />
-          <hr className="my-1.5  border-neutral-200/50 dark:border-neutral-800/50" />
-          {/* <Nudge
-            Icon={TriangleAlert}
-            title="Reportar errores"
+          <PageLine />
+          <Nudge
+            Icon={LifeBuoy}
+            title="Centro de ayuda"
+            // to="/settings/help"
             onClick={() => setIsOpen(false)}
-          /> */}
+          />
+          <Nudge
+            Icon={MessageSquareWarning}
+            title="Informar un problema"
+            // to="/settings/languages"
+            onClick={() => setIsOpen(false)}
+          />
+          <PageLine />
           {user ? (
             <Nudge
               Icon={LogOut}
