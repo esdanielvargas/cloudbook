@@ -55,7 +55,14 @@ export default function FormField(props) {
               >
                 {label}
               </label>
-              {required ? <span className="ml-0.5 text-rose-600 cursor-pointer" title="Este campo es obligatorio.">*</span> : null}
+              {required ? (
+                <span
+                  className="ml-0.5 text-rose-600 cursor-pointer"
+                  title="Este campo es obligatorio."
+                >
+                  *
+                </span>
+              ) : null}
             </div>
           )}
 
@@ -194,20 +201,32 @@ export default function FormField(props) {
                   loading="eager"
                   alt={`Imagen de perfil de ${props?.name ?? "nombre"} (@${props?.username ?? "usuario"})`}
                   title={`Imagen de perfil de ${props?.name ?? "nombre"} (@${props?.username ?? "usuario"})`}
-                  className="size-full object-cover object-center select-none pointer-events-none border-none outline-none"
+                  className="size-full object-cover object-center select-none pointer-events-none"
                 />
               </div>
             ) : (
-              <div className="size-full flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
-                <img
-                  src={src && src.length > 0 ? src : "/images/photo.png"}
-                  width={248}
-                  height={140}
-                  loading="eager"
-                  alt={`Imagen de banner de ${props?.name ?? "nombre"} (@${props?.username ?? "usuario"})`}
-                  title={`Imagen de banner de ${props?.name ?? "nombre"} (@${props?.username ?? "usuario"})`}
-                  className="size-full object-contain object-center select-none pointer-events-none border-none outline-none scale-111 bg-neutral-950/40"
-                />
+              <div className="size-full flex items-center justify-center rounded-lg overflow-hidden">
+                {src && src.length > 0 ? (
+                  <img
+                    src={src && src.length > 0 ? src : "/images/photo.png"}
+                    width={320} // 248 
+                    height={140}
+                    loading="eager"
+                    alt={`Imagen de banner de ${props?.name ?? "nombre"} (@${props?.username ?? "usuario"})`}
+                    title={`Imagen de banner de ${props?.name ?? "nombre"} (@${props?.username ?? "usuario"})`}
+                    className="size-full object-cover object-center select-none pointer-events-none"
+                  />
+                ) : (
+                  <img
+                    src="/images/photo.png"
+                    alt=""
+                    title=""
+                    width={320}
+                    height={140}
+                    loading="eager"
+                    className="size-full object-contain object-center select-none pointer-events-none bg-neutral-950/40"
+                  />
+                )}
               </div>
             )}
           </div>
@@ -242,34 +261,27 @@ export default function FormField(props) {
       )}
 
       {/* Input normal */}
-      {!textarea &&
-        !select &&
-        !range &&
-        !readOnly &&
-        !boolean &&
-        !image &&
-        !avatar &&
-        !banner && (
-          <div className="relative w-full flex items-center">
-            {Icon && (
-              <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
-                <Icon size={20} className="size-5" />
-              </div>
-            )}
-            <input
-              id={id}
-              name={name}
-              type={type}
-              placeholder={placeholder}
-              value={value}
-              onChange={onChange}
-              className={`w-full h-10 ${
-                Icon ? "pl-11" : "px-3.5"
-              } text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 text-neutral-950 dark:text-neutral-50 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition-colors duration-300 ease-out ${className}`}
-              {...rest}
-            />
-          </div>
-        )}
+      {!textarea && !select && !range && !readOnly && !boolean && !image && (
+        <div className="relative w-full flex items-center">
+          {Icon && (
+            <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
+              <Icon size={20} className="size-5" />
+            </div>
+          )}
+          <input
+            id={id}
+            name={name}
+            type={type}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            className={`w-full h-10 ${
+              Icon ? "pl-11" : "px-3.5"
+            } text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 text-neutral-950 dark:text-neutral-50 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition-colors duration-300 ease-out ${className}`}
+            {...rest}
+          />
+        </div>
+      )}
 
       {/* Info */}
       {info && (
