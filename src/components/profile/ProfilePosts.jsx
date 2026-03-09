@@ -2,6 +2,8 @@ import { useParams } from "react-router-dom";
 import { db, usePosts, useUsers } from "../../hooks";
 import Post from "../Post";
 import { getAuth } from "firebase/auth";
+import EmptyState from "../EmptyState";
+import { File, FileText } from "lucide-react";
 
 export default function ProfilePosts() {
   const auth = getAuth();
@@ -21,10 +23,7 @@ export default function ProfilePosts() {
   const statusPosts = userPosts.filter((post) => post?.status === "public");
 
   // Ordenamos del más nuevo al más antiguo
-  const sortedPosts = [...statusPosts].sort(
-    (a, b) =>
-      new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000)
-  );
+  const sortedPosts = [...statusPosts].sort((a, b) => b.posted - a.posted);
 
   // Comparamos el usuario de este perfil con el usuario logeado
   const isAuthor = auth?.currentUser?.uid === user?.uid;
@@ -42,11 +41,11 @@ export default function ProfilePosts() {
           />
         ))
       ) : (
-        <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
-          <span className="text-xs md:text-sm text-neutral-400">
-            Aún no hay publicaciones en tú perfil.
-          </span>
-        </div>
+        <EmptyState
+          Icon={FileText}
+          title={"Sin publicaciones"}
+          caption={"Aún no hay publicaciones de este perfil."}
+        />
       )}
     </div>
   );

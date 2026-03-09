@@ -2,6 +2,8 @@ import { db, usePosts, useUsers } from "../../hooks";
 import { useParams } from "react-router-dom";
 import Post from "../Post";
 import { getAuth } from "firebase/auth";
+import EmptyState from "../EmptyState";
+import { Ban, BookmarkX } from "lucide-react";
 
 export default function ProfileSaved() {
   const auth = getAuth();
@@ -12,14 +14,14 @@ export default function ProfileSaved() {
 
   const userSelected = users.find((user) => user?.username === username);
   const currentUser = users.find(
-    (user) => user?.uid === auth?.currentUser?.uid
+    (user) => user?.uid === auth?.currentUser?.uid,
   );
 
   const postsFiltered = posts.filter((post) => {
     if (!Array.isArray(post.saved)) return false;
 
     const isSavedByUser = post.saved.some(
-      (savedItem) => savedItem.id === userSelected?.id
+      (savedItem) => savedItem.id === userSelected?.id,
     );
 
     const isPublic = post.status === "public";
@@ -30,7 +32,7 @@ export default function ProfileSaved() {
   return (
     <>
       {currentUser?.username === username ? (
-        <div className="w-full flex flex-col gap-1">
+        <div className="size-full flex flex-col gap-1">
           {postsFiltered.length > 0 ? (
             postsFiltered.map((post, index) => {
               // Buscar usuario asociado a la publicación
@@ -47,19 +49,19 @@ export default function ProfileSaved() {
               );
             })
           ) : (
-            <div className="w-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
-              <span className="text-xs md:text-sm text-neutral-400">
-                Aún no hay publicaciones guardadas en tú perfil.
-              </span>
-            </div>
+            <EmptyState
+              Icon={BookmarkX}
+              title={"Sin guardados"}
+              caption={"Aún no hay publicaciones guardadas."}
+            />
           )}
         </div>
       ) : (
-        <div className="w-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
-          <span className="text-xs md:text-sm text-neutral-400">
-            No tienes acceso a esta página.
-          </span>
-        </div>
+        <EmptyState
+          Icon={Ban}
+          title={"Acceso restringido"}
+          caption={"No tienes acceso a esta página."}
+        />
       )}
     </>
   );

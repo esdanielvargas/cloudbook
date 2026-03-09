@@ -52,18 +52,18 @@ export default function ProfileInfo() {
       caption: `${birthdate} (${age} años)`,
     },
     {
-      show: true,
+      show: false,
       type: "divider",
     },
     {
-      show: verified,
+      show: user?.verified,
       Icon: VerifiedIcon,
       title: "Verificado",
       caption: verified,
       path: "/upgrade?ref=profile_info",
     },
     {
-      show: true,
+      show: false,
       type: "divider",
     },
   ];

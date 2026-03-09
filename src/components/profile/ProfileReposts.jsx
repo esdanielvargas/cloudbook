@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
-import { db, usePosts, useUsers } from "../../hooks";
+import { db, usePosts, useUsers } from "@/hooks";
+import { Repeat } from "lucide-react";
 import Post from "../Post";
+import EmptyState from "../EmptyState";
 
 export default function ProfileReposts() {
   const posts = usePosts(db);
@@ -24,7 +26,7 @@ export default function ProfileReposts() {
   // Ordenamos del más nuevo al más antiguo
   const sortedPosts = [...reposts].sort(
     (a, b) =>
-      new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000)
+      new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000),
   );
 
   return (
@@ -34,12 +36,18 @@ export default function ProfileReposts() {
           <Post key={post.id} {...post} {...user} postId={post?.id} />
         ))
       ) : (
-        <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
-          <span className="text-xs md:text-sm text-neutral-400">
-            Aún no hay publicaciones reposteadas en tú perfil.
-          </span>
-        </div>
+        <EmptyState
+          Icon={Repeat}
+          title={"Aún no hay republicaciones"}
+          caption={"Aún no se han compartido publicaciones de otros usuarios en este perfil."}
+          className="col-span-3"
+        />
       )}
     </div>
   );
 }
+// <div className="size-full p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
+//   <span className="text-xs md:text-sm text-neutral-400">
+//     Aún no hay publicaciones reposteadas en tú perfil.
+//   </span>
+// </div>
