@@ -123,8 +123,12 @@ export default function PageHeaderHome() {
       >
         <div className="w-full px-2 md:px-4 pt-2 md:pt-4 flex items-center justify-center">
           <div className="size-full flex items-center justify-start gap-1.5">
+            <link
+              rel="canonical"
+              href={window.location.origin + window.location.pathname}
+            />
             <h1 className="sr-only">¡Bienvenidos a CloudBook!</h1>
-            <h2 className="font-black text-xl font-sans tracking-wide">
+            <h2 className="font-black text-xl font-favorit tracking-wide">
               CloudBook
             </h2>
           </div>
