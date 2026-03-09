@@ -3,13 +3,11 @@ import { Bubbly } from "./buttons";
 import { Icon } from "lucide-react";
 import {
   BellIcon,
-  EnvelopeIcon,
   HomeIcon,
   MagnifyingGlassIcon,
-  ShoppingBagIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { db, useAuth, useUsers } from "../hooks";
+import { db, useAuth, useUsers } from "@/hooks";
 
 export default function MenuMobile() {
   const auth = useAuth(db);
@@ -26,15 +24,12 @@ export default function MenuMobile() {
       <div className="w-full x.max-w-150 px-4 md:px-0 flex items-center justify-between gap-0.5">
         <Bubbly Icon={HomeIcon} title="Inicio" path="/" />
         <Bubbly Icon={MagnifyingGlassIcon} title="Buscar" path="/search" />
-        {/* <Bubbly Icon={ShoppingBagIcon} title="Tienda" path="/news" /> */}
         <Bubbly
           Icon={ComposeIcon}
           title="Crear"
           path="/compose"
           active={true}
-          // bgColor="bg-sky-500"
         />
-        {/* <Bubbly Icon={EnvelopeIcon} title="Chats" path="/notify" /> */}
         <Bubbly Icon={BellIcon} title="Avisos" path="/notify" />
         <Bubbly Icon={UserIcon} title="Perfil" path={`/${user ? user?.username : "login"}`} />
       </div>
