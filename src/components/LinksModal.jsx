@@ -1,6 +1,6 @@
-import { useLinksModal } from "../context/ModalProvider";
-import { formatLink } from "../utils";
-import { useThemeColor } from "../context";
+import { useLinksModal } from "@/context/ModalProvider";
+import { useThemeColor } from "@/context";
+import { formatLink } from "@/utils";
 
 export const LinksModal = () => {
   const { isOpen, closeModal, modalData } = useLinksModal();
@@ -10,13 +10,13 @@ export const LinksModal = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="size-full fixed z-[150] inset-0 flex items-center justify-center bg-neutral-950/50 -backdrop-blur-xs transition-all duration-300 ease-out">
+    <div className="size-full fixed z-[150] inset-0 flex items-center justify-center bg-neutral-950/50 transition-all duration-300 ease-out">
       {/* Fondo transparente que cierra el modal al hacer click */}
       <div className="absolute inset-0" onClick={closeModal}></div>
 
       <div className="relative size-full md:ml-[calc(80px_+_32px)] flex items-end md:items-center justify-center pointer-events-none">
         {/* Contenedor del Modal */}
-        <div className="pointer-events-auto w-full md:w-110 py-2 md:bottom flex flex-col gap-0.5 rounded-t-3xl md:rounded-3xl bg-neutral-900 border-t md:border border-neutral-800 shadow-2xl max-h-[80vh] overflow-y-auto">
+        <div className="pointer-events-auto w-full md:w-110 py-2 md:bottom flex flex-col gap-0.5 rounded-t-3xl md:rounded-2xl bg-neutral-900 border-t md:border border-neutral-800 shadow-2xl max-h-[80vh] overflow-y-auto">
           {/* Encabezado opcional del modal */}
           <div className="px-4 py-2 flex justify-between items-center">
             <span className="text-neutral-50 text-lg font-medium">Enlaces</span>
