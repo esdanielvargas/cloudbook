@@ -271,8 +271,9 @@ export default function Profile() {
               src={user?.banner}
               alt={`Portada de ${user?.name} (@${user?.username})`}
               title={`Portada de ${user?.name} (@${user?.username})`}
+              fetchPriority="high"
               loading="eager"
-              width={568}
+              width={600}
               height={200}
               className="size-full object-cover object-center pointer-events-none select-none"
               onError={(e) => {
@@ -299,8 +300,9 @@ export default function Profile() {
             {/* Foto de perfil */}
             <div className="z-2 absolute flex items-center justify-center overflow-hidden rounded-3xl! md:rounded-4xl!">
               <Avatar
-                size={88}
+                size={102}
                 action={false}
+                priority={true}
                 avatar={user?.avatar}
                 {...user}
                 className="size-22! md:size-26! rounded-3xl! md:rounded-4xl!"
