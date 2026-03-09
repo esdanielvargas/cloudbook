@@ -31,6 +31,7 @@ export default function FormField(props) {
     boolean,
     onClick,
     onChange,
+    required,
     uploading,
     onImageChange,
     onImageRemove,
@@ -47,12 +48,15 @@ export default function FormField(props) {
       {(label || caption) && (
         <div className="w-full flex flex-col gap-1.5">
           {label && (
-            <label
-              htmlFor={id}
-              className="text-md font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              {label}
-            </label>
+            <div className="w-full flex items-center justify-start">
+              <label
+                htmlFor={id}
+                className="text-md font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                {label}
+              </label>
+              {required ? <span className="ml-0.5 text-rose-600 cursor-pointer" title="Este campo es obligatorio.">*</span> : null}
+            </div>
           )}
 
           {caption && (
@@ -69,6 +73,11 @@ export default function FormField(props) {
               to={path}
               className="w-full h-10 px-3.5 py-2 flex items-center rounded-lg bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-sm text-neutral-950 dark:text-neutral-50 break-all overflow-hidden cursor-text"
             >
+              {Icon && (
+                <div className="min-w-5 h-full flex items-center justify-center">
+                  <Icon size={20} className="size-5" strokeWidth={1.5} />
+                </div>
+              )}
               {value || (
                 <span className="w-full text-sm text-neutral-400">
                   {placeholder}
@@ -233,18 +242,34 @@ export default function FormField(props) {
       )}
 
       {/* Input normal */}
-      {!textarea && !select && !range && !readOnly && !boolean && !image && (
-        <input
-          id={id}
-          name={name}
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          className={`w-full h-10 px-3.5 text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 text-neutral-950 dark:text-neutral-50 border border-neutral-200 dark:border-neutral-800 focus:outline-none ${className}`}
-          {...rest}
-        />
-      )}
+      {!textarea &&
+        !select &&
+        !range &&
+        !readOnly &&
+        !boolean &&
+        !image &&
+        !avatar &&
+        !banner && (
+          <div className="relative w-full flex items-center">
+            {Icon && (
+              <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
+                <Icon size={20} className="size-5" />
+              </div>
+            )}
+            <input
+              id={id}
+              name={name}
+              type={type}
+              placeholder={placeholder}
+              value={value}
+              onChange={onChange}
+              className={`w-full h-10 ${
+                Icon ? "pl-11" : "px-3.5"
+              } text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 text-neutral-950 dark:text-neutral-50 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition-colors duration-300 ease-out ${className}`}
+              {...rest}
+            />
+          </div>
+        )}
 
       {/* Info */}
       {info && (
