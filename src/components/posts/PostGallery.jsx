@@ -45,8 +45,8 @@ export default function PostGallery(props) {
       <div className="size-full max-h-85.5 md:max-h-141.5 z-1 flex items-center justify-center relative overflow-hidden">
         <img
           src={props?.photos?.[currentIndex]}
-          alt={props?.text ? props?.text : `Publicación de ${props.author?.name} @(${props.author?.username}), sin texto descriptivo del contenido.`}
-          title={props?.text ? props?.text : `Publicación de ${props.author?.name} @(${props.author?.username}), sin texto descriptivo del contenido.`}
+          alt={props?.text ? props?.text : `Publicación de ${props?.name} @(${props?.username}), sin texto descriptivo del contenido.`}
+          title={props?.text ? props?.text : `Publicación de ${props?.name} @(${props?.username}), sin texto descriptivo del contenido.`}
           width={596}
           height={596}
           loading="eager"
@@ -54,8 +54,8 @@ export default function PostGallery(props) {
         />
         <img
           src={props?.photos?.[currentIndex]}
-          alt={props?.text ? props?.text : `Publicación de ${props.author?.name} @(${props.author?.username}), sin texto descriptivo del contenido.`}
-          title={props?.text ? props?.text : `Publicación de ${props.author?.name} @(${props.author?.username}), sin texto descriptivo del contenido.`}
+          alt={props?.text ? props?.text : `Publicación de ${props?.name} @(${props?.username}), sin texto descriptivo del contenido.`}
+          title={props?.text ? props?.text : `Publicación de ${props?.name} @(${props?.username}), sin texto descriptivo del contenido.`}
           width={596}
           height={596}
           loading="eager"
