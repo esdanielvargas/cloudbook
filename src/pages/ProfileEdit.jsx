@@ -53,7 +53,6 @@ export default function ProfileEdit() {
       setValue("username", currentUser?.username || "");
       setValue("categories", categoriesString);
       setValue("bio", currentUser?.bio || "");
-      setValue("email", currentUser?.email || "");
 
       setIsVerified(
         typeof currentUser.verified === "object"
@@ -205,7 +204,7 @@ export default function ProfileEdit() {
                 <FormField
                   label="Imagen de banner"
                   caption="La imagen de banner representa tu perfil y aparece en la parte superior de tu página de perfil."
-                  text="Te recomendamos que subas una imagen de 2048x1152 píxeles y 6 MB como máximo para que pueda verse bien en todas las pantallas."
+                  text="Te recomendamos que subas una imagen de 600x200 píxeles y 6 MB como máximo para que pueda verse bien en todas las pantallas."
                   image
                   banner
                   src={watch("banner")}
@@ -214,12 +213,11 @@ export default function ProfileEdit() {
                   onImageChange={() => bannerInputRef.current.click()}
                   onImageRemove={() => onRemoveImage("banner")}
                   uploading={uploadingField === "banner"}
-                  // info={`https://storage.${username}.com/images/banner.png`}
                 />
                 <FormField
                   label="Imagen de perfil"
                   caption="La imagen de perfil representa tu perfil y aparece en cualquier acción que realices."
-                  text="Te recomendamos que utilices una imagen de 98x98 píxeles y 4 MB como máximo. Usa un archivo PNG o GIF (no animado). Asegúrate de que la imagen cumple las Normas de la Comunidad de CloudBook."
+                  text="Te recomendamos que utilices una imagen de 120x120 píxeles y 4 MB como máximo. Usa un archivo PNG o GIF (no animado). Asegúrate de que la imagen cumple las Normas de la Comunidad de CloudBook."
                   image
                   avatar
                   src={watch("avatar")}
@@ -228,7 +226,6 @@ export default function ProfileEdit() {
                   onImageChange={() => avatarInputRef.current.click()}
                   onImageRemove={() => onRemoveImage("avatar")}
                   uploading={uploadingField === "avatar"}
-                  // info={`https://storage.${username}.com/images/profile.png`}
                 />
               </div>
               <PageLine />
