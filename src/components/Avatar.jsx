@@ -31,8 +31,7 @@ export default function Avatar({
 
   const content = (
     <img
-      src={avatar}
-      width={size}
+      src={avatar && avatar.length > 0 ? avatar : "/images/avatar.png"}
       height={size}
       loading="eager"
       alt={`Foto de perfil de ${name} (@${username})`}
