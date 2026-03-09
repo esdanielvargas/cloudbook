@@ -3,16 +3,64 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bienvenido a CloudBook</title>
-  <link rel="canonical" href="https://cloudbook.danielvargas.dev">
-  <meta name="description" content="description">
+
+  <title>CloudBook</title>
+
+  <meta name="description" content="Descubre un nuevo mundo en CloudBook. Conecta con personas, comparte tus mejores momentos y comunica tus ideas en la red social diseñada para la nueva generación. ¡Diviértete!">
+  <meta name="author" content="Daniel Vargas">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cloudbook.danielvargas.dev">
+  <meta property="og:title" content="CloudBook">
+  <meta property="og:description" content="Descubre un nuevo mundo en CloudBook. Conecta con personas, comparte tus mejores momentos y comunica tus ideas en la red social diseñada para la nueva generación. ¡Diviértete!">
+  <meta property="og:image" content="https://cloudbook.danielvargas.dev/images/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://cloudbook.danielvargas.dev">
+  <meta property="twitter:title" content="CloudBook">
+  <meta property="twitter:description" content="Descubre un nuevo mundo en CloudBook. Conecta con personas, comparte tus mejores momentos y comunica tus ideas en la red social diseñada para la nueva generación. ¡Diviértete!">
+  <meta property="twitter:image" content="https://cloudbook.danielvargas.dev/images/og-image.jpg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap"
+    rel="stylesheet">
+
   <link href="./src/styles.css" rel="stylesheet">
 </head>
 
 <body class="overflow-y-scroll">
+
+  <noscript>
+    <div class="w-full min-h-dvh flex items-center justify-center bg-white px-6 dark:bg-neutral-950">
+      <div
+        class="max-w-md rounded-xl border border-neutral-200 bg-neutral-50 p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+        <h1
+          class="mb-4 font-bold text-xl font-google-sans-flex tracking-tighter text-neutral-900 dark:text-neutral-100 sm:text-2xl">
+          «JavaScript es necesario»
+        </h1>
+        <p class="font-normal text-sm leading-relaxed font-google-sans-flex text-neutral-600 dark:text-neutral-400">
+          <!-- Lo sentimos, la experiencia de CloudBook no está disponible sin JavaScript. 
+          Por favor, actíva el JavaScript en la configuración de tu navegador para acceder a esta aplicación. -->
+          Acceso restringido: CloudBook requiere la ejecución de JavaScript. Por favor, habilita esta función en los
+          ajustes de tu navegador para poder utilizar esta aplicación.
+        </p>
+        <div class="mt-6 flex gap-1">
+          <div class="h-1 w-8 bg-neutral-900 dark:bg-neutral-100"></div>
+          <div class="h-1 w-2 bg-neutral-300 dark:bg-neutral-700"></div>
+          <div class="h-1 w-1 bg-neutral-200 dark:bg-neutral-800"></div>
+        </div>
+      </div>
+    </div>
+  </noscript>
+
   <div id="root"></div>
+
   <script type="module" src="/src/main.jsx"></script>
 </body>
 
