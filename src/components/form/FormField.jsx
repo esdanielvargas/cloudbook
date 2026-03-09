@@ -116,7 +116,7 @@ export default function FormField(props) {
           placeholder={placeholder}
           onChange={onChange}
           value={value}
-          className={`w-full p-2 md:p-3 resize-none text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none ${className}`}
+          className={`w-full p-2 md:p-3 resize-none text-sm rounded-lg bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none custom-scrollbar ${className}`}
           {...rest}
         />
       )}
