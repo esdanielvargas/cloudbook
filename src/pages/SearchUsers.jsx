@@ -1,31 +1,29 @@
+import { BadgeCheck, Frown, Settings, Settings2, Star } from "lucide-react";
 import {
-  BadgeCheck,
-  Settings,
-  Settings2,
-  Star,
-} from "lucide-react";
-import {
-  PageBox,
   PageHeader,
-  PageTabs,
+  PageBox,
   SearchBar,
+  PageTabs,
   UserCard,
-} from "../components";
-import { db, useDebounce, useUsers } from "../hooks";
-import { useState } from "react";
+  EmptyState,
+} from "@/components";
+import { db, useDebounce, useUsers } from "@/hooks";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function SearchUsers() {
   const users = useUsers(db);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Estado para el término de búsqueda y el tab activo
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedTerm = useDebounce(searchTerm, 500);
 
-  // Estado para filtrar
-  const [filters, setFilters] = useState({
-    popular: false,
-    verified: false,
-  });
+  // Actualizar el término de búsqueda desde los query params
+  useEffect(() => {
+    setSearchTerm(searchParams.get("q") || "");
+  }, [searchParams]);
 
   // Manejar cambios en la barra de búsqueda
   const handleSearchChange = (event) => {
@@ -33,60 +31,40 @@ export default function SearchUsers() {
     setSearchTerm(newTerm);
   };
 
-  // Alternar filtros
-  const toggleFilter = (filter) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filter]: !prev[filter],
-    }));
-  };
-
-  // Determinar si es una búsqueda por hashtag
-  const isHashtagSearch = debouncedTerm.startsWith("#");
+  // Normalizamos el término de búsqueda para evitar problemas de espacios
+  const cleanTerm = debouncedTerm.trim().toLowerCase();
 
   // Filtrar usuarios
-  const filteredUsers = !isHashtagSearch
-    ? users.filter((user) => {
-        const matchesSearch =
-          user.name.toLowerCase().includes(debouncedTerm) ||
-          user.username.toLowerCase().includes(debouncedTerm);
-        const matchesPopular =
-          !filters.popular || user.followers.length >= 1000;
-        const matchesVerified = !filters.verified || user.verified;
-        return matchesSearch && matchesPopular && matchesVerified;
-      })
-    : [];
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user?.name
+        ?.toLowerCase()
+        .includes(cleanTerm.replace("#", "").replace("@", "")) ||
+      user?.username
+        ?.toLowerCase()
+        .includes(cleanTerm.replace("#", "").replace("@", "")) ||
+      user?.categories?.some((cat) =>
+        cat.toLowerCase().includes(cleanTerm.replace("#", "").replace("@", "")),
+      );
 
-  //Usuarios populares para la búsqueda
-  const popular = users.filter(
-    (user) => user?.followers?.length >= 1000 || user?.verified
-  );
+    return matchesSearch;
+  });
+
+  // Si hay término, preparamos el query string, si no, string vacío
+  const queryParam = searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : "";
 
   return (
     <>
       <PageHeader
         title="Buscar perfiles"
-        icon={<Settings2 size={18} strokeWidth={1.5} />}
-        menuOptions={[
-          {
-            icon: Star,
-            title: "Filtrar por perfiles populares",
-            onClick: () => toggleFilter("popular"),
-          },
-          {
-            icon: BadgeCheck,
-            title: "Filtrar por perfiles verificados",
-            onClick: () => toggleFilter("verified"),
-          },
-          { type: "divider" },
-          {
-            icon: Settings,
-            title: "Configuración de búsqueda",
-            to: "/settings/search",
-          },
-        ]}
+        header="Buscar perfiles ~ CloudBook"
+        buttonRight={{
+          icon: Settings2,
+          title: "Configuración de búsqueda",
+          onClick: () => navigate(`/settings/search`),
+        }}
       />
-      <PageBox active>
+      <PageBox className="gap-2" active>
         <SearchBar
           value={searchTerm}
           onChange={handleSearchChange}
@@ -97,47 +75,78 @@ export default function SearchUsers() {
             {
               id: "home",
               label: "Destacados",
-              to: "/search",
+              path: `/search${queryParam}`,
             },
             {
               id: "users",
               label: "Perfiles",
-              to: "/search/profiles",
+              path: `/search/profiles${queryParam}`,
             },
             {
               id: "posts",
               label: "Publicaciones",
-              to: "/search/posts",
+              path: `/search/posts${queryParam}`,
             },
           ]}
-          activeTab={"/search/profiles"}
+          activeTab={`/search/profiles${queryParam}`}
         />
-        <div className="w-full space-y-1">
-          {searchTerm
-            ? filteredUsers
-                .sort((a, b) => b.followers.length - a.followers.length)
-                .map((user, index) => (
-                  <div
-                    key={index}
-                    className="w-full cursor-pointer flex items-center justify-between rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-out"
-                  >
-                    <UserCard {...user} show_followers={true} />
-                  </div>
-                ))
-            : popular
-                .sort((a, b) => b?.followers?.length - a?.followers?.length)
-                .map((user, index) => (
-                  <div
-                    key={index}
-                    className="w-full cursor-pointer flex items-center justify-between rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-out"
-                  >
-                    <UserCard {...user} show_followers={true} />
-                  </div>
-                ))}
-          {filteredUsers.length === 0 && !isHashtagSearch && (
-            <div className="py-10 text-center text-neutral-500 dark:text-neutral-400">
-              No se encontraron usuarios con ese nombre o filtro. 😕
+        <div className="w-full xmt-2 flex flex-col gap-1">
+          {filteredUsers.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 gap-1">
+                {searchTerm ? (
+                  filteredUsers.length > 0 ? (
+                    filteredUsers
+                      .sort(
+                        (a, b) =>
+                          (b.followers?.length || 0) -
+                          (a.followers?.length || 0),
+                      )
+                      .map((user, index) => (
+                        <div
+                          key={index}
+                          className="w-full flex items-center justify-between rounded-xl border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all cursor-pointer"
+                        >
+                          <UserCard {...user} showFollowButton={true} users />
+                        </div>
+                      ))
+                  ) : (
+                    <EmptyState
+                      Icon={Frown}
+                      title="Sin perfiles"
+                      caption="No hay usuarios que coincidan con tu búsqueda."
+                    />
+                  )
+                ) : (
+                  users
+                    .filter(
+                      (u) =>
+                        u?.followers?.length >= 1000 || u?.verified?.status,
+                    )
+                    .sort(
+                      (a, b) =>
+                        (b.followers?.length || 0) - (a.followers?.length || 0),
+                    )
+                    .slice(0, 4)
+                    .map((user, index) => (
+                      <div
+                        key={index}
+                        className="w-full flex items-center justify-between rounded-xl border border-neutral-200/50 dark:border-neutral-800/50 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all cursor-pointer"
+                      >
+                        <UserCard {...user} showFollowButton={true} users />
+                      </div>
+                    ))
+                )}
+              </div>
             </div>
+          )}
+
+          {filteredUsers.length === 0 && (
+            <EmptyState
+              Icon={Frown}
+              title="Sin resultados"
+              caption={`No encontramos nada para «${searchTerm}»`}
+            />
           )}
         </div>
       </PageBox>
