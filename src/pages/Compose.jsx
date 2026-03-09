@@ -1,16 +1,8 @@
-import {
-  File,
-  Images,
-  Link2,
-  Plus,
-  Video,
-  X,
-  Pencil,
-} from "lucide-react";
-import { Form, FormField, MenuAlt, PageBox, PageHeader } from "../components";
-import { PostHeader } from "../components/posts";
+import { File, Images, Link2, Plus, Video, X, Pencil } from "lucide-react";
+import { Form, FormField, MenuAlt, PageBox, PageHeader } from "@/components";
+import { PostHeader } from "@/components/posts";
 import { getAuth } from "firebase/auth";
-import { db, usePosts, useUsers } from "../hooks";
+import { db, usePosts, useUsers } from "@/hooks";
 import {
   addDoc,
   collection,
@@ -18,16 +10,17 @@ import {
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
-import { Button } from "../components/buttons";
+import { Button } from "@/components/buttons";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import ReactPlayer from "react-player";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from "../firebase/config";
+import { storage } from "@/firebase/config";
 import { v4 } from "uuid";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import PostRepost from "../components/posts/PostRepost";
-import PostTitle from "../components/posts/PostTitle";
+import PostRepost from "@/components/posts/PostRepost";
+import PostTitle from "@/components/posts/PostTitle";
+import { PlayIcon } from "@heroicons/react/24/solid";
 
 export default function Compose() {
   const auth = getAuth();
@@ -35,7 +28,7 @@ export default function Compose() {
   const posts = usePosts(db);
   const navigate = useNavigate();
 
-  // 1. CAMBIO: Usamos searchParams para leer ?post=ID
+  // Usamos searchParams para leer ?post=ID
   const [searchParams] = useSearchParams();
   const postId = searchParams.get("post");
   const repostId = searchParams.get("repost");
@@ -52,27 +45,20 @@ export default function Compose() {
   const { register, watch, handleSubmit, setValue, reset } = useForm();
 
   const currentUser = users.find(
-    (user) => user?.uid === auth?.currentUser?.uid
+    (user) => user?.uid === auth?.currentUser?.uid,
   );
-
-  const title = watch("title");
-
-  const [rows, setRows] = useState(1);
-  const limit = 12;
 
   const [photos, setPhotos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [video, setVideo] = useState(false);
-  const videoId = watch("video");
-
-  const [url, setUrl] = useState(false);
-  const [link, setLink] = useState("");
+  const [openLink, setOpenLink] = useState(false);
+  const [link, setLink] = useState([]);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 2. CAMBIO: Efecto para cargar datos si estamos editando
+  // Efecto para cargar datos si estamos editando
   useEffect(() => {
     if (postSelected) {
       // Cargar Caption
@@ -82,9 +68,9 @@ export default function Compose() {
       // Cargar Fotos existentes
       if (postSelected.photos && postSelected.photos.length > 0) {
         const existingPhotos = postSelected.photos.map((photoUrl) => ({
-          file: null, // No hay archivo físico porque ya está en la nube
+          file: null,
           url: photoUrl,
-          isExisting: true, // Bandera para saber que no hay que resubirla
+          isExisting: true,
         }));
         setPhotos(existingPhotos);
       }
@@ -96,16 +82,10 @@ export default function Compose() {
       }
 
       // Cargar Link
-      // === CAMBIO PARA LINK ===
-      // Verificamos si el post guardado tiene la estructura nueva (linkPreview)
-      // o la vieja (link string) para mantener compatibilidad
       if (postSelected.linkPreview) {
-        // Estructura NUEVA y OPTIMIZADA
-        setUrl(true);
+        setOpenLink(true);
         setLink(postSelected.linkPreview.url);
 
-        // Importante: Seteamos la 'data' directamente desde lo guardado
-        // ¡Ya no hace falta hacer fetch de nuevo al editar!
         setData({
           title: postSelected.linkPreview.title,
           description: postSelected.linkPreview.description,
@@ -115,9 +95,7 @@ export default function Compose() {
           logo: { url: postSelected.linkPreview.logo },
         });
       } else if (postSelected.link) {
-        // Estructura VIEJA (solo string)
-        // Aquí sí dejamos que el otro useEffect haga el fetch
-        setUrl(true);
+        setOpenLink(true);
         setLink(postSelected.link);
       }
     }
@@ -127,8 +105,8 @@ export default function Compose() {
     const selectedFiles = Array.from(event.target.files);
 
     setPhotos((prevFiles) => {
-      if (prevFiles.length + selectedFiles.length > 6) {
-        alert("Solo puedes subir hasta 6 imágenes.");
+      if (prevFiles.length + selectedFiles.length > 4) {
+        alert("Solo puedes subir hasta 4 imágenes.");
         return prevFiles;
       }
 
@@ -144,7 +122,6 @@ export default function Compose() {
   const handleRemoveFile = (indexToRemove) => {
     setPhotos((prevFiles) => {
       const fileToRemove = prevFiles[indexToRemove];
-      // Solo revocamos URL si es un archivo local nuevo
       if (fileToRemove?.url && !fileToRemove.isExisting) {
         URL.revokeObjectURL(fileToRemove.url);
       }
@@ -153,7 +130,7 @@ export default function Compose() {
 
       if (indexToRemove === currentIndex && newFiles.length > 0) {
         setCurrentIndex((prevIndex) =>
-          prevIndex >= newFiles.length ? newFiles.length - 1 : prevIndex
+          prevIndex >= newFiles.length ? newFiles.length - 1 : prevIndex,
         );
       } else if (indexToRemove < currentIndex) {
         setCurrentIndex((prevIndex) => prevIndex - 1);
@@ -184,9 +161,6 @@ export default function Compose() {
   }, [link]);
 
   const fetchPreviewData = async (linkUrl) => {
-    // ... (Tu código actual de fetchPreviewData) ...
-    // Nota: Copia tu función fetchPreviewData aquí, la he omitido para no hacer la respuesta gigante,
-    // pero la lógica es la misma.
     if (!linkUrl || typeof linkUrl !== "string") return;
     setLoading(true);
     setError(null);
@@ -199,7 +173,7 @@ export default function Compose() {
       let resultData = null;
       if (isYouTube) {
         const response = await fetch(
-          `https://noembed.com/embed?url=${encodeURIComponent(finalUrl)}`
+          `https://noembed.com/embed?url=${encodeURIComponent(finalUrl)}`,
         );
         const json = await response.json();
         if (json.error) throw new Error("Video no disponible");
@@ -213,7 +187,7 @@ export default function Compose() {
         };
       } else {
         const response = await fetch(
-          `https://api.microlink.io/?url=${encodeURIComponent(finalUrl)}`
+          `https://api.microlink.io/?url=${encodeURIComponent(finalUrl)}`,
         );
         const result = await response.json();
         if (result.status === "success") resultData = result.data;
@@ -231,12 +205,13 @@ export default function Compose() {
   const onSubmit = async (formData) => {
     if (isSubmitting) return;
 
-    if (
-      !data?.caption &&
-      photos?.length === 0 &&
-      !videoId?.length === 0 &&
-      !link
-    ) {
+    const hasCaption = formData.caption?.trim().length > 0;
+    const hasTitle = formData.title?.trim().length > 0;
+    const hasVideo = formData.video?.trim().length > 0;
+    const hasPhotos = photos?.length > 0;
+    const hasLink = link?.length > 0;
+
+    if (!hasCaption && !hasPhotos && !hasVideo && !hasLink && !hasTitle) {
       alert("No puedes publicar un post vacío.");
       return;
     }
@@ -250,54 +225,38 @@ export default function Compose() {
               photos.map(async (photo) => {
                 if (photo.isExisting) return photo.url;
                 return await uploadFile(photo.file);
-              })
+              }),
             )
           : [];
 
-      const userId = currentUser?.id;
-
-      // Preparamos el objeto de metadata del enlace
       let linkData = null;
-
-      // Si hay un enlace escrito Y tenemos la data de la previsualización cargada
-      if (link && data) {
+      if (hasLink) {
         linkData = {
-          url: link, // La url original
-          title: data.title || "",
-          description: data.description || "",
-          image: data.image?.url || "", // Guardamos la URL de la imagen directamente
-          publisher: data.publisher || "",
-          logo: data.logo?.url || "",
-        };
-      } else if (link && !data) {
-        // Fallback: Si el usuario puso un link pero la API falló o no cargó,
-        // guardamos al menos la URL pura.
-        linkData = {
-          url: link,
-          title: link, // Usamos la URL como título temporal
-          description: "",
-          image: "",
-          publisher: "",
+          url: link.trim(),
+          title: data?.title || link,
+          caption: data?.description || "",
+          image: data?.image?.url || "",
+          publisher: data?.publisher || "",
+          logo: data?.logo?.url || "",
         };
       }
 
       const postPayload = {
-        userId: userId,
-        repost: repostId,
-        caption: formData.caption || "",
-        photos: photoURLs || [],
-        title: formData.title || "",
-        video: formData.video || "",
-        link: linkData || [],
+        userId: currentUser?.id,
         status: "public",
       };
 
+      if (repostId) postPayload.repost = repostId;
+      if (hasTitle) postPayload.title = formData.title.trim();
+      if (hasCaption) postPayload.caption = formData.caption.trim();
+      if (photoURLs && photoURLs.length > 0) postPayload.photos = photoURLs;
+      if (hasVideo) postPayload.video = formData.video.trim();
+      if (linkData) postPayload.linkPreview = linkData;
+
       if (postId) {
-        // === MODO EDICIÓN ===
         const postRef = doc(db, "posts", postId);
 
-        // Validar seguridad: verificar que el post sea del usuario actual
-        if (postSelected.userId !== userId) {
+        if (postSelected.userId !== currentUser?.id) {
           alert("No tienes permiso para editar esto");
           return;
         }
@@ -307,9 +266,7 @@ export default function Compose() {
           updatedAt: Timestamp.now(),
         });
       } else {
-        // === MODO CREACIÓN ===
         const postsRef = collection(db, "posts");
-
         await addDoc(postsRef, {
           ...postPayload,
           posted: Timestamp.now(),
@@ -317,10 +274,10 @@ export default function Compose() {
       }
 
       reset();
+      setLink("");
       setPhotos([]);
       setVideo(false);
-      setLink("");
-      setUrl(false);
+      setOpenLink(false);
       navigate(`/${currentUser?.username}`);
     } catch (error) {
       console.error("Error al guardar la publicación:", error);
@@ -334,8 +291,11 @@ export default function Compose() {
     <>
       <PageHeader
         title={postId ? "Editar publicación" : "Nueva publicación"}
-        Icon={postId ? Pencil : File}
-        iconTitle={postId ? "Editando" : "Borradores"}
+        header={`${postId ? "Editar publicación" : "Nueva publicación"} ~ CloudBook`}
+        buttonRight={{
+          icon: postId ? Pencil : File,
+          title: postId ? "Editando" : "Borradores",
+        }}
       />
       <PageBox active className="relative p-0! gap-0!">
         <PostHeader
@@ -343,41 +303,53 @@ export default function Compose() {
           posted={postSelected?.posted || Timestamp.now()}
           action={false}
         />
-        <Button
-          variant="icon"
-          className="absolute top-2 right-2 md:top-4 md:right-4 flex md:hidden"
-          onClick={() => setRows(rows < limit ? rows + 1 : 1)}
-        >
-          <Plus size={20} strokeWidth={1.5} />
-        </Button>
-        <div className="absolute top-2 right-2 md:top-4 md:right-4 text-xs">{watch("caption")?.length}/560</div>
         <Form onSubmit={handleSubmit(onSubmit)}>
-          <div className="w-full px-2 md:px-4 mb-2 md:mb-4 flex flex-col items-center">
-            {title && <PostTitle title={title} />}
-            <textarea
-              rows={rows}
+          <div className="w-full px-2 md:px-4 mb-2 md:mb-4 flex flex-col items-center gap-2.5">
+            <FormField
+              label="Encabezado"
+              caption="Escribe un encabezado para esta publicación."
+              info={`${watch("title")?.length || 0}/60 caracteres`}
+              error={
+                watch("title")?.length > 60 &&
+                "El título no puede contener más de 60 caracteres."
+              }
+              {...register("title")}
+              placeholder="Escribe el título aquí..."
+              maxLength={60}
+            />
+            <FormField
+              label="Contenido"
+              caption="Comparte tus ideas con la comunidad."
+              info={`${watch("caption")?.length || 0}/280 caracteres`}
+              error={
+                watch("caption")?.length > 280 &&
+                "El contenido no puede contener más de 280 caracteres."
+              }
               {...register("caption")}
+              textarea
+              rows={3}
               placeholder={
                 postId ? "Edita tu publicación..." : "¿En qué estás pensando?"
               }
-              maxLength={560}
-              className={`w-full min-h-5 max-h-25 resize-none md:resize-y text-xs md:text-sm focus:outline-none`}
+              maxLength={280}
+              className="min-h-25 max-h-75 resize-y"
             />
           </div>
 
           {/* Carrusel de fotos */}
           {photos.length > 0 && (
-            <div className="w-full max-h-85.5 md:max-h-141.5 relative flex items-center justify-start gap-0.5 -md:gap-2 overflow-x-scroll custom-scrollbar">
+            <div className="w-full max-h-85.5 md:max-h-146 relative flex items-center justify-start gap-0.5 overflow-x-auto custom-scrollbar">
               {photos.map((_, index) => (
                 <div
                   key={index}
-                  className="min-w-85.5 md:min-w-141.5 h-full relative flex items-center justify-center"
+                  className="size-full min-w-85.5 md:min-w-141.5 h-full relative flex items-center justify-center"
                 >
                   <div className="absolute top-2 left-2 text-xs font-mono text-white bg-black/50 px-1 rounded">{`${
                     index + 1
                   }/${photos?.length}`}</div>
                   <Button
                     variant="icon"
+                    title="Descartar esta foto"
                     className="size-7! absolute top-2 right-2 rounded-full! bg-black/50 hover:bg-black/70 text-white"
                     onClick={() => handleRemoveFile(index)}
                   >
@@ -392,28 +364,22 @@ export default function Compose() {
               ))}
             </div>
           )}
+
           {/* Video */}
-          {video && (
+          {video && !openLink && (
             <div className="w-full mb-2 md:mb-4 flex flex-col items-center justify-center gap-2 md:gap-4">
               {watch("video") && (
-                <div className="w-full h-[192px] md:h-[336px] flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
-                  <ReactPlayer
-                    playing={false}
-                    url={`https://www.youtube.com/watch?v=${
-                      watch("video") || ""
-                    }`}
-                    light={`https://i.ytimg.com/vi/${watch(
-                      "video"
-                    )}/maxresdefault.jpg`}
-                    width="100%"
-                    height="100%"
+                <div className="w-full relative flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 overflow-hidden">
+                  <img
+                    src={`https://i.ytimg.com/vi/${watch("video")}/maxresdefault.jpg`}
+                    className="aspect-video object-cover object-center select-none pointer-events-none"
                   />
                 </div>
               )}
               <div className="w-full px-2 md:px-4 flex flex-col items-center justify-center gap-4">
                 <FormField
-                  label="ID del video de YouTube"
-                  text={`https://www.youtube.com/watch?v=${
+                  label="Video de YouTube"
+                  caption={`https://youtube.com/watch?v=${
                     watch("video") ? watch("video") : "videoID"
                   }`}
                   placeholder="Ej: UiW9-Q9z5LU"
@@ -422,38 +388,25 @@ export default function Compose() {
                   {...register("video", { required: true })}
                   required
                 />
-                <FormField
-                  label="Título del video"
-                  placeholder="Ej: Piano Lofi + Lluvia"
-                  id="title"
-                  name="title"
-                  {...register("title", { required: true })}
-                  required
-                />
               </div>
             </div>
           )}
 
-          {url && (
-            <div className="w-full space-y-2 md:space-y-4">
-              <div className="w-full mb-2 md:mb-4 px-2 md:px-4">
+          {/* Enlace */}
+          {(openLink || (link?.length > 0 && !video)) && (
+            <div className="w-full flex flex-col border-t border-neutral-200/75 dark:border-neutral-800/75">
+              <div className="w-full my-2 md:my-4 px-2 md:px-4">
                 <FormField
                   type="search"
-                  placeholder="Ingresa el enlace"
+                  label="Enlace de referencia"
+                  caption=""
+                  placeholder="https://ejemplo.com"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
+                  info={loading ? "Buscando información del enlace..." : ""}
+                  error={error}
                 />
               </div>
-              {/* Estado de carga */}
-              {loading && (
-                <p className="px-2 md:px-4 text-xs" style={{ color: "#666" }}>
-                  Buscando información del enlace...
-                </p>
-              )}
-              {/* Mensaje de error */}
-              {error && (
-                <p className="px-2 md:px-4 text-xs text-rose-600">{error}</p>
-              )}
               {!loading && data && (
                 <a
                   href={data.url || link}
@@ -518,9 +471,13 @@ export default function Compose() {
           {repostSelected && <PostRepost repost={repostId} />}
 
           {/* Acciones */}
-          <div className="w-full px-2 py-2 md:px-4 flex items-center justify-between border-y border-neutral-200/75 dark:border-neutral-800/75">
-            <div className="w-full flex items-center justify-start gap-2">
-              <Button variant="icon" className="relative">
+          <div className="w-full p-2.5 md:p-4 flex items-center justify-between border-t border-neutral-200/75 dark:border-neutral-800/75">
+            <div className="w-full flex items-center justify-start gap-0.5">
+              <Button
+                variant="icon"
+                disabled={video || openLink}
+                className="disabled:cursor-no-drop! disabled:text-neutral-500!"
+              >
                 <label
                   htmlFor="photos"
                   className="cursor-pointer flex items-center"
@@ -535,10 +492,20 @@ export default function Compose() {
                   onChange={handleFileChange}
                 />
               </Button>
-              <Button variant="icon" onClick={() => setVideo(!video)}>
+              <Button
+                variant="icon"
+                onClick={() => setVideo(!video)}
+                disabled={photos.length > 0 || openLink ? true : false}
+                className="disabled:cursor-no-drop! disabled:text-neutral-500!"
+              >
                 <Video size={20} />
               </Button>
-              <Button variant="icon" onClick={() => setUrl(!url)}>
+              <Button
+                variant="icon"
+                onClick={() => setOpenLink(!openLink)}
+                disabled={photos.length > 0 || video ? true : false}
+                className="disabled:cursor-no-drop! disabled:text-neutral-500!"
+              >
                 <Link2 size={20} className="-rotate-45" />
               </Button>
             </div>
@@ -553,8 +520,8 @@ export default function Compose() {
                 {isSubmitting
                   ? "Guardando..."
                   : postId
-                  ? "Actualizar"
-                  : "Publicar"}
+                    ? "Actualizar"
+                    : "Publicar"}
               </Button>
             </div>
           </div>
