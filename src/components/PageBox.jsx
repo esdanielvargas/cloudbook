@@ -4,13 +4,13 @@ export default function PageBox({ active = false, children, className = "" }) {
       <div
         className={`size-full z-1 flex flex-col gap-1 lg:gap-2 ${
           active
-            ? "p-2 lg:p-4 rounded-2xl bg-neutral-100/50 dark:bg-neutral-900/75 border border-neutral-200/75 dark:border-neutral-800/75 "
+            ? "p-3 md:p-4 rounded-2xl bg-neutral-100/50 dark:bg-neutral-900/75 border border-neutral-200/75 dark:border-neutral-800/75 "
             : ""
-        }mb-2 lg:mb-4 overflow-hidden ${className}`}
+        } overflow-hidden ${className}`}
       >
         {children}
       </div>
-      <div className="w-full min-h-20 md:min-h-4" />
+      <div className="w-full min-h-2 md:min-h-4" />
     </>
   );
 }
