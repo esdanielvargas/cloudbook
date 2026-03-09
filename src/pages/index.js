@@ -16,6 +16,9 @@ import SearchPosts from "./SearchPosts";
 import Compose from "./Compose";
 import Chats from "./Chats";
 import Notify from "./Notify";
+import Links from "./Links";
+import LinkForm from "./LinkForm";
+import LinksReorder from "./LinksReorder";
 import Profile from "./Profile";
 import ProfileInfo from "./ProfileInfo";
 import ProfileEdit from "./ProfileEdit";
@@ -43,6 +46,7 @@ import PreferencesUsers from "./PreferencesUsers";
 import PreferencesTopics from "./PreferencesTopics";
 import PreferencesHashtags from "./PreferencesHashtags";
 import AuthAction from "./AuthAction";
+import Legal from "./Legal";
 
 export {
   Login,
@@ -63,6 +67,9 @@ export {
   Compose,
   Chats,
   Notify,
+  Links,
+  LinkForm,
+  LinksReorder,
   Profile,
   ProfileInfo,
   ProfileEdit,
@@ -90,4 +97,5 @@ export {
   PreferencesTopics,
   PreferencesHashtags,
   AuthAction,
+  Legal,
 };
