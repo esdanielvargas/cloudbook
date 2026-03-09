@@ -23,8 +23,9 @@ export default function PageTabs({ tabs = [], activeTab, onChange }) {
       {tabs.map((tab, index) => (
         <Button
           key={tab.id}
-          variant={activeTab === tab.to ? "active" : "inactive"}
-          to={`${tab.to}`}
+          variant={activeTab === tab.path ? "active" : "inactive"}
+          to={tab.path}
+          // onClick={() => onChange(tab.id)}
           onKeyDown={(e) => handleKeyDown(e, tab.id, index)}
           role="tab"
           aria-selected={activeTab === tab.id}
