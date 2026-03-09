@@ -1,8 +1,8 @@
 {
-    "short_name": "CLoudBook",
+    "short_name": "CloudBook",
     "name": "CloudBook",
-    "description": "",
-    "start_url": ".",
+    "description": "Descubre un nuevo mundo en CloudBook. Conecta con personas, comparte tus mejores momentos y comunica tus ideas en la red social diseñada para la nueva generación. ¡Diviértete!",
+    "start_url": "/",
     "theme_color": "#0a0a0a",
     "background_color": "#0a0a0a",
     "orientation": "portrait",
@@ -10,7 +10,9 @@
     "scope": "/",
     "lang": "es",
     "categories": [
-        ""
+        "social",
+        "lifestyle",
+        "entertainment"
     ],
     "icons": [
         {
@@ -27,6 +29,44 @@
             "src": "/images/logo512.png",
             "type": "image/png",
             "sizes": "512x512"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Nueva publicación",
+            "short_name": "Publicar",
+            "description": "Crea un nuevo post en CloudBook",
+            "url": "/compose",
+            "icons": [
+                {
+                    "src": "/images/logo192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Buscar perfiles o publicaciones",
+            "short_name": "Buscar",
+            "description": "Busca amigos o contenido",
+            "url": "/search",
+            "icons": [
+                {
+                    "src": "/images/logo192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Nueva lista",
+            "short_name": "Listas",
+            "description": "Crea una lista nueva",
+            "url": "/lists/new",
+            "icons": [
+                {
+                    "src": "/images/logo192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }
