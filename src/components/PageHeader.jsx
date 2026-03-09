@@ -1,10 +1,11 @@
-import { ChevronLeft, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import MenuAlt from "./MenuAlt";
-import { Nudge } from "./buttons";
+import { ChevronLeft, Sparkles } from "lucide-react";
 import PageLine from "./PageLine";
+import { Nudge } from "./buttons";
+import MenuAlt from "./MenuAlt";
 
-function HeaderButton({ Icon, title, onClick }) {
+function HeaderButton({ Icon, title, onClick, className }) {
   return (
     <button
       type="button"
@@ -13,32 +14,38 @@ function HeaderButton({ Icon, title, onClick }) {
       onClick={onClick}
       className="size-9.5 flex items-center justify-center cursor-pointer rounded-lg bg-neutral-100 dark:bg-neutral-900/75 border border-neutral-200 dark:border-neutral-800/75"
     >
-      {Icon && <Icon size={20} className="size-4.5" strokeWidth={1.5} />}
+      {Icon && <Icon size={20} className={`size-4.5 ${className}`} strokeWidth={1.5} />}
     </button>
-  );
-}
-
-function PromoButton() {
-  return (
-    <HeaderButton
-      Icon={Sparkles}
-      title="Mejorar plan"
-      onClick={() => alert("Upsell a Premium 🚀")}
-    />
   );
 }
 
 export default function PageHeader({
   title,
   header,
-  Icon = null,
-  iconTitle = "",
-  menuOptions = null,
-  iconOnClick = null,
+  caption,
+  buttonLeft,
+  buttonRight,
   hideUpgrade = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Valores por defecto para el botón izquierdo (Volver)
+  const leftAction = {
+    icon: ChevronLeft,
+    title: "Volver atrás",
+    onClick: () => window.history.back(),
+    ...buttonLeft, // Sobrescribe con lo que pases por props
+  };
+
+  // Valores por defecto para el botón derecho (Upgrade o Acción)
+  const rightAction = {
+    icon: Sparkles,
+    title: "Mejorar plan",
+    onClick: () => alert("CloudBook Premium 🚀"),
+    ...buttonRight,
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -50,71 +57,78 @@ export default function PageHeader({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const handleRightActionClick = () => {
-    if (menuOptions?.length) {
+  const handleLeftClick = () => {
+    if (leftAction.path) {
+      navigate(leftAction.path);
+    } else {
+      leftAction.onClick();
+    }
+  };
+
+  const handleRightClick = () => {
+    if (rightAction.menuOptions?.length > 0) {
       setIsOpen((prev) => !prev);
-    } else if (iconOnClick) {
-      iconOnClick();
+    } else {
+      rightAction.onClick();
     }
   };
 
   return (
     <>
       <header className="w-full md:w-142 p-2 md:py-4 md:px-0 z-10 fixed md:sticky left-0 md:left-auto top-0 flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-950/50 backdrop-blur-xl">
-        {/* Izquierda: Volver atrás */}
+        {/* Lado Izquierdo */}
         <div className="min-w-max flex items-center justify-start">
           <HeaderButton
-            Icon={ChevronLeft}
-            title="Volver atrás"
-            onClick={() => window.history.back()}
+            Icon={leftAction.icon}
+            title={leftAction.title}
+            onClick={handleLeftClick}
           />
         </div>
 
-        {/* Centro: Título dinámico */}
-        <div className="w-full h-9.5 flex items-center justify-center overflow-hidden">
-          <h1 className="sr-only">{header ?? "Header no disponible..."}</h1>
-          <h2 className="w-full cursor-default text-center font-bold text-lg md:text-lg font-sans truncate">
+        {/* Centro */}
+        <div className="w-full h-9.5 flex flex-col items-center justify-center overflow-hidden">
+          <title>{header ?? `${title} ~ CloudBook`}</title>
+          {caption && <meta name="description" content={caption} />}
+          <link rel="canonical" href={`${window.location.origin}${window.location.pathname}`} />
+          <h1 className="sr-only">{header ?? title}</h1>
+          <h2 className="w-full cursor-default text-center font-bold text-lg font-sans truncate px-2">
             {title ?? "Cargando..."}
           </h2>
-          <title>{title ? `${title} ~ CloudBook` : "CloudBook"}</title>
         </div>
 
-        {/* Derecha: Acción personalizable o Upgrade */}
+        {/* Lado Derecho */}
         <div className="min-w-max flex items-center justify-end relative">
-          {Icon ? (
+          {buttonRight || !hideUpgrade ? (
             <HeaderButton
-              Icon={Icon}
-              title={iconTitle}
-              onClick={handleRightActionClick}
-            />
-          ) : !hideUpgrade ? (
-            <HeaderButton
-              Icon={Sparkles}
-              title="Mejorar plan"
-              onClick={() => alert("Próximamente: CloudBook Premium 🚀")}
+              Icon={rightAction.icon}
+              title={rightAction.title}
+              onClick={handleRightClick}
+              className={rightAction.className}
             />
           ) : (
-            <div className="size-9.5" /> 
+            <div className="size-9.5" />
           )}
 
-          {/* Menú de opciones */}
-          {menuOptions?.length > 0 && isOpen && (
-            <MenuAlt ref={menuRef} isOpen={isOpen} className="top-0 right-0">
-              {menuOptions.map((item, index) =>
-                item.type === "divider" ? (
-                  <PageLine key={index} />
-                ) : (
-                  <Nudge
-                    key={index}
-                    Icon={item.icon}
-                    onClick={() => {
-                      item.onClick?.();
-                      setIsOpen(false);
-                    }}
-                    {...item}
-                  />
-                ),
-              )}
+          {/* Menú desplegable */}
+          {rightAction.menuOptions?.length > 0 && isOpen && (
+            <MenuAlt ref={menuRef} isOpen={isOpen} className="top-11 right-0">
+              {rightAction.menuOptions
+                .filter((item) => item.show !== false)
+                .map((item, index) =>
+                  item.type === "divider" ? (
+                    <PageLine key={index} />
+                  ) : (
+                    <Nudge
+                      key={index}
+                      Icon={item.icon}
+                      onClick={() => {
+                        item.onClick?.();
+                        setIsOpen(false);
+                      }}
+                      {...item}
+                    />
+                  ),
+                )}
             </MenuAlt>
           )}
         </div>
