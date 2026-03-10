@@ -2,43 +2,35 @@
 
 > **Estado:** 🟢 Beta Funcional (En desarrollo activo)
 
-**CloudBook** es una red social diseñada para compartir momentos de forma versátil. El objetivo es crear una plataforma donde los usuarios puedan registrarse, personalizar su experiencia y compartir su vida a través de texto, fotos, videos y enlaces.
-
-Actualmente, el núcleo de la aplicación es funcional y me encuentro implementando las características de descubrimiento y métricas.
+**CloudBook** es una red social diseñada para la nueva generación, enfocada en la versatilidad y la personalización. Permite a los usuarios conectar, compartir momentos y organizar su consumo de contenido de forma inteligente.
 
 🔗 **Demo en vivo:** [Visitar CloudBook](https://cloudbook.danielvargas.dev/)
 
 ## 🚀 Tecnologías
 
-Este proyecto está construido con:
-
 * **Frontend:** React + JavaScript (Vite)
-* **Estilos:** TailwindCSS (Modo oscuro automático y personalización)
-* **Backend as a Service:** Firebase (Base de datos en tiempo real)
-* **Autenticación:** Firebase Auth
-* **Almacenamiento:** Firebase Storage (Imágenes)
+* **Estilos:** TailwindCSS (Sistema de temas dinámico y Custom Scrollbars)
+* **Backend:** Firebase (Firestore, Auth, Storage)
+* **Optimización:** SEO dinámico, PWA Ready y Carga de imágenes priorizada (LCP).
 
 ## ✨ Funcionalidades
 
 ### ✅ Implementado
-- [x] **Soporte Multimedia:** Posts combinados de Texto, Fotos, Videos de YouTube (vía ID) y Enlaces.
-- [x] **UI Adaptable:** Detección automática de tema (Claro/Oscuro) y color de énfasis personalizado.
-- [x] **Interacciones:** Sistema de Likes y Guardado de publicaciones.
-- [x] **Rich Text:** Detección automática de @menciones y #hashtags en los textos.
-- [x] **Navegación:** Enrutamiento a perfiles de usuario mediante menciones (@).
-- [x] **Autenticación:** Registro e inicio de sesión seguro.
+- [x] **Compositor Inteligente:** Creación de posts con lógica de exclusividad para Fotos, Videos (YouTube) y Enlaces.
+- [x] **Personalización:** Sistema de colores de énfasis y modo oscuro automático.
+- [x] **Descubrimiento:** Sistema completo de **Hashtags** con feeds filtrados y búsqueda global.
+- [x] **Feeds Personalizados:** Capacidad de crear listas de cuentas específicas para filtrar lo que quieres ver.
+- [x] **Música:** Componente `MusicBox` especializado para lanzamientos artísticos.
+- [x] **Rich Text:** Detección automática de @menciones, #hashtags y enlaces con navegación integrada.
+- [x] **Legal & UX:** Directorio de políticas, términos y estados vacíos (`EmptyState`) en toda la app.
+- [x] **Engagement:** Sistema de notificaciones instantáneas para nuevos seguidores y "likes" en publicaciones.
+- [x] **Hilos de Conversación:** Capacidad de comentar en las publicaciones para fomentar la interacción.
 
 ### 🛠️ En desarrollo (Próximamente)
-- [ ] **Página de Hashtags:** Feed filtrado por etiquetas (al hacer clic en un #).
-- [ ] **Métricas:** Historial de hora/fecha en interacciones.
-- [ ] **Engagement:** Sistema de notificaciones y comentarios.
-- [ ] **Analíticas:** Estadísticas de visualización.
+- [ ] **Métricas:** Estadísticas avanzadas de visualización para creadores.
 
-## 📢 Nota
-
-**CloudBook** se encuentra actualmente en fase de desarrollo activo y pruebas privadas. Estoy trabajando en los últimos detalles de seguridad y experiencia de usuario para garantizar la mejor plataforma posible.
-
-**El registro de usuarios estará disponible al público muy pronto.**
+## 📢 Nota del Desarrollador
+CloudBook utiliza una arquitectura de **Payload Cleaning** para optimizar el uso de Firebase y garantizar una base de datos limpia y eficiente. Actualmente en fase de optimización de cuotas y seguridad.
 
 ---
-_© 2025 CloudBook. Desarrollado por [Daniel Vargas](https://danielvargas.dev/?utm_source=cloudbook_repo&utm_medium=github&utm_campaign=profile_link)._
+_© 2026 CloudBook. Desarrollado por [Daniel Vargas](https://danielvargas.dev/?utm_source=cloudbook_repo&utm_medium=github&utm_campaign=profile_link)._
