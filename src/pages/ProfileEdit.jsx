@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { Button } from "@/components/buttons";
-import { KeyRound, LockKeyhole, Mail, Save } from "lucide-react";
+import { ChevronLeft, KeyRound, LockKeyhole, Mail, Save } from "lucide-react";
 import {
   deleteObject,
   getDownloadURL,
@@ -169,6 +169,11 @@ export default function ProfileEdit() {
       <PageHeader
         title="Editar perfil"
         header={"Actualiza la información de tu perfil"}
+        buttonLeft={{
+          icon: ChevronLeft,
+          title: "Volver atrás",
+          onClick: () => navigate(`/${username}`),
+        }}
         buttonRight={{
           icon: Save,
           title: "Guardar cambios",
