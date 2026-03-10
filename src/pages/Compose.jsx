@@ -82,19 +82,19 @@ export default function Compose() {
       }
 
       // Cargar Link
-      if (postSelected.linkPreview) {
+      if (postSelected.link) {
         setOpenLink(true);
-        setLink(postSelected.linkPreview.url);
+        setLink(postSelected.link.url);
 
         setData({
-          title: postSelected.linkPreview.title,
-          description: postSelected.linkPreview.description,
-          image: { url: postSelected.linkPreview.image },
-          url: postSelected.linkPreview.url,
-          publisher: postSelected.linkPreview.publisher,
-          logo: { url: postSelected.linkPreview.logo },
+          title: postSelected.link.title,
+          description: postSelected.link.description,
+          image: { url: postSelected.link.image },
+          url: postSelected.link.url,
+          publisher: postSelected.link.publisher,
+          logo: { url: postSelected.link.logo },
         });
-      } else if (postSelected.link) {
+      } else if (postSelected) {
         setOpenLink(true);
         setLink(postSelected.link);
       }
@@ -251,7 +251,7 @@ export default function Compose() {
       if (hasCaption) postPayload.caption = formData.caption.trim();
       if (photoURLs && photoURLs.length > 0) postPayload.photos = photoURLs;
       if (hasVideo) postPayload.video = formData.video.trim();
-      if (linkData) postPayload.linkPreview = linkData;
+      if (linkData) postPayload.link = linkData;
 
       if (postId) {
         const postRef = doc(db, "posts", postId);
