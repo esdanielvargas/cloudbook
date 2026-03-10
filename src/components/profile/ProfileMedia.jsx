@@ -29,8 +29,8 @@ export default function ProfileMedia() {
   // Filtramos solo los posts publicos
   const statusPosts = mediaPosts.filter((post) => post?.status === "public");
 
-  // Ordenamos del más nuevo al más viejo (asumimos que hay una propiedad post.createdAt)
-  const sortedMedia = [...statusPosts].sort((a, b) => a.posted - b.posted);
+  // Ordenamos del más nuevo al más viejo
+  const sortedMedia = [...statusPosts].sort((a, b) => b.posted - a.posted);
 
   return (
     <div className="w-full grid grid-cols-3 gap-0.5 md:gap-1">
