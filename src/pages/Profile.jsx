@@ -2,7 +2,10 @@ import {
   Archive,
   AudioLines,
   BadgeCheck,
+  Ban,
+  Camera,
   EllipsisVertical,
+  Eye,
   Folder,
   Grid3X3,
   Info,
@@ -12,12 +15,16 @@ import {
   ListX,
   Lock,
   LockKeyhole,
+  Newspaper,
   OctagonAlert,
   Rss,
+  Share,
+  ShieldAlert,
   SquareKanban,
   Star,
   StarOff,
   UserLock,
+  UserMinus,
   UserPen,
   UserX,
   VolumeOff,
@@ -32,7 +39,6 @@ import {
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import { abbrNumber, cleanUrlParams, copyProfileLink } from "@/utils";
-import { useState } from "react";
 import { Button } from "@/components/buttons";
 import { useThemeColor } from "@/context";
 import { getAuth } from "firebase/auth";
@@ -54,7 +60,7 @@ export default function Profile() {
   const posts = usePosts(db);
   const notifications = useNotify(db);
   const { username } = useParams();
-  const { txtClass } = useThemeColor();
+  const { accentHex, txtClass } = useThemeColor();
   const { openModal } = useLinksModal();
 
   // Información del perfil
@@ -71,7 +77,7 @@ export default function Profile() {
   // Initialize follow state based on whether currentUser is following authorId
   const isFollowing = user?.followers?.includes(currentUser?.id) || false;
   const followMe = user?.following?.includes(currentUser?.id) || false;
-  const [isFavorited, setIsFavorited] = useState(false);
+  const isFavorite = user?.favorites?.includes(currentUser?.id) || false;
 
   const follow = async (targetUserId, currentUserId) => {
     try {
@@ -190,92 +196,70 @@ export default function Profile() {
       title: "Republicaciones",
       path: "reposts",
     },
-    {
-      id: "kqgFjxemEn1rYO",
-      show: isOwner,
-      Icon: BookmarkIcon,
-      title: "Guardados",
-      path: "saved",
-    },
-    {
-      id: "mc0HzML99NPh8f",
-      show: false,
-      Icon: HeartIcon,
-      title: "Me gustas",
-      path: "loved",
-    },
   ];
 
   return (
     <>
       <PageHeader
         title={user?.name}
-        header={`${currentUser?.name} (@${currentUser?.username}) ~ CloudBook`}
+        header={`${user?.name} (@${user?.username}) ~ CloudBook`}
         Icon={EllipsisVertical}
         iconTitle="Más opciones"
         menuOptions={[
           {
-            icon: isFavorited ? StarOff : Star,
-            title: isFavorited ? "Eliminar de favoritos" : "Añadir a favoritos",
-            onClick: () => {
-              setIsFavorited(!isFavorited);
-              alert(
-                isFavorited ? "Eliminado de favoritos" : "Añadido a favoritos",
-              );
-            },
-          },
-          {
-            icon: isFavorited ? ListX : ListPlus,
-            title: isFavorited ? "Eliminar de un feed" : "Agregar a un feed",
-            onClick: () => {
-              setIsFavorited(!isFavorited);
-              alert(
-                isFavorited ? "Eliminado de una lista" : "Añadido a una lista",
-              );
-            },
-          },
-          {
-            icon: Rss,
-            title: "Ver feeds",
-            // to: `/${user?.username}/info`,
-          },
-          {
+            show: true,
             icon: Info,
-            title: "Información del perfil",
+            title: "Información sobre este perfil",
             to: `/${username}/info`,
           },
-          { type: "divider" },
           {
+            show: true,
+            icon: Share,
+            title: "Compartir perfil vía...",
+            onClick: () =>
+              navigator.share({
+                title: `${user?.name} (@${user?.username}) ~ CloudBook`,
+                text: user.bio ?? "Sin descripción.",
+                url: window.location.href,
+              }),
+          },
+          {
+            show: true,
+            icon: Link2,
+            rotate: -45,
+            title: "Copiar enlace del perfil",
+            onClick: () => copyProfileLink(user?.username),
+          },
+          { show: true, type: "divider" },
+          {
+            show: !isOwner,
+            icon: Newspaper,
+            title: "Agregar a una lista",
+            to: `/lists?add_user=${username}`,
+          },
+          {
+            show: !isOwner && user?.followMe,
+            icon: UserMinus,
+            title: "Eliminar seguidor",
+            // onClick: () => handleRemoveFollower(username),
+          },
+          {
+            show: isOwner,
             icon: BadgeCheck,
             title: "Obtener la verificación",
-            // to: `/verify`
           },
-          { type: "divider" },
+          { show: !isOwner, type: "divider" },
           {
-            icon: VolumeOff,
-            title: `Silenciar a @${username}`,
-          },
-          {
-            icon: UserLock,
-            title: `Restringir a @${username}`,
-            alert: true,
-          },
-          {
-            icon: UserX,
+            show: !isOwner,
+            icon: Ban,
             title: `Bloquear a @${username}`,
             alert: true,
           },
           {
+            show: !isOwner,
             icon: OctagonAlert,
             title: `Reportar a @${username}`,
             alert: true,
-          },
-          { type: "divider" },
-          {
-            icon: Link2,
-            title: "Copiar enlace del perfil",
-            rotate: -45,
-            onClick: () => copyProfileLink(user?.username),
           },
         ]}
       />
@@ -287,8 +271,9 @@ export default function Profile() {
               src={user?.banner}
               alt={`Portada de ${user?.name} (@${user?.username})`}
               title={`Portada de ${user?.name} (@${user?.username})`}
+              fetchPriority="high"
               loading="eager"
-              width={568}
+              width={600}
               height={200}
               className="size-full object-cover object-center pointer-events-none select-none"
               onError={(e) => {
@@ -313,21 +298,33 @@ export default function Profile() {
           {/* Foto de perfil y botones de acción */}
           <div className="w-full flex items-end justify-between">
             {/* Foto de perfil */}
-            <div className="absolute flex items-center justify-center">
+            <div className="z-2 absolute flex items-center justify-center overflow-hidden rounded-3xl! md:rounded-4xl!">
               <Avatar
-                size={88}
+                size={102}
                 action={false}
+                priority={true}
                 avatar={user?.avatar}
                 {...user}
                 className="size-22! md:size-26! rounded-3xl! md:rounded-4xl!"
               />
             </div>
             {/* Botones de acción */}
-            <div className="w-full relative flex items-center justify-end gap-1">
+            <div className="w-full z-1 relative flex items-center justify-end gap-1">
               {currentUser && currentUser?.uid !== user?.uid ? (
                 <>
-                  <Button variant="inactive" className="px-0! aspect-square!">
-                    <Star size={20} strokeWidth={1.5} />
+                  <Button
+                    variant="inactive"
+                    className="px-0! aspect-square!"
+                    title={
+                      isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"
+                    }
+                  >
+                    <Star
+                      size={20}
+                      strokeWidth={1.5}
+                      fill={isFavorite ? accentHex : "none"}
+                      stroke={isFavorite ? accentHex : "currentColor"}
+                    />
                   </Button>
                   <Button
                     variant={isFollowing ? "followed" : "follow"}
@@ -393,44 +390,48 @@ export default function Profile() {
             {/* Nombre de usuario */}
             <div className="w-full flex items-center justify-start gap-1">
               <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                @{user?.username ? user?.username : "username"}
+                @{user?.username ?? "username"}
               </div>
-              {isOwner && user?.private && (
-                <span
-                  className="-mt-0.5 flex items-center justify-center cursor-help"
-                  title="Perfil privado"
-                >
-                  <LockKeyhole size={14} />
-                </span>
-              )}
             </div>
+            {/* Categorías */}
+            {user?.categories && user?.categories.length > 0 && (
+              <div className="w-full mt-1 flex items-center justify-start gap-1 overflow-hidden">
+                {user?.categories?.slice(0, 2).map((category, index) => (
+                  <Link to={`/search?q=${category.trim(" ")}&serp_type=tags`} key={index} className="min-w-max py-0.5 px-1.5 rounded-md bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-400">
+                    {category}
+                  </Link>
+                ))}
+                {user?.categories?.length > 2 && (
+                  <div className="min-w-max py-0.5 px-1.5 rounded-md bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 cursor-pointer">
+                    +{user.categories.length - 2} más
+                  </div>
+                )}
+              </div>
+            )}
             {/* Description */}
             <div className="w-full flex items-center justify-start gap-1">
-              <div className="w-full py-2 text-left text-sm text-balance line-clamp-2 truncate">
+              <div className="w-full my-2 text-left text-sm text-balance line-clamp-2 whitespace-pre-wrap">
                 {user?.bio || "Aún no hay descripción corta..."}
               </div>
             </div>
             {/* Enlaces */}
-            {user?.website && user?.links?.length > 0 && (
+            {user?.links?.length > 0 && (
               <div className="w-full flex items-center justify-start gap-1 mb-2">
                 {/* Primer enlace (Link Principal) */}
                 <a
-                  href={user?.website ? user?.website : user.links[0].link}
+                  href={user.links[0].link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`flex items-center gap-0.5 text-sm ${txtClass} active:underline hover:underline`}
                 >
                   <Link2 size={14} className="-rotate-45" />
-                  {user?.website
-                    ? cleanUrlParams(user?.website)
-                    : cleanUrlParams(user.links[0].link)}
+                  {cleanUrlParams(user.links[0].link)}
                 </a>
-
-                {/* Texto "y X enlaces más" que abre el Modal */}
+                {/* Texto "y X enlaces" que abre el Modal */}
                 {user.links.length > 1 && (
                   <span
                     className={`text-sm ${txtClass} cursor-pointer opacity-95`}
-                    onClick={handleOpenLinks} // <--- 3. Conectamos el evento
+                    onClick={handleOpenLinks}
                   >
                     y {user.links.length - 1}
                     {user.links.length === 2 ? " enlace " : " enlaces "} más
@@ -521,10 +522,12 @@ export default function Profile() {
           <Outlet />
         ) : (
           <EmptyState
-          Icon={LockKeyhole}
-          title={"Contenido exclusivo para seguidores"}
-          caption={"Haz clic en «Seguir» para conectar con este perfil y no perderte ninguna de sus actualizaciones."}
-        />
+            Icon={LockKeyhole}
+            title={"Contenido exclusivo para seguidores"}
+            caption={
+              "Haz clic en «Seguir» para conectar con este perfil y no perderte ninguna de sus actualizaciones."
+            }
+          />
         )}
       </div>
     </>

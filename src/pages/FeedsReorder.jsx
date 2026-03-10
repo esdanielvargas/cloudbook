@@ -90,12 +90,15 @@ export default function FeedsReorder() {
     <>
       <PageHeader
         title="Reordenar"
-        Icon={Check}
-        iconTitle={saving ? "Guardando..." : "Listo"}
         iconOnClick={saveOrder}
+        buttonRight={{
+          icon: Check,
+          title: saving ? "Guardando..." : "Listo",
+          onClick: () => saveOrder(),
+        }}
       />
       <PageBox active className="p-0! gap-0!">
-        <div 
+        <div
           ref={containerRef}
           className="w-full flex flex-col"
           onTouchMove={onTouchMove}
@@ -112,10 +115,11 @@ export default function FeedsReorder() {
                 handleMove(draggedIndex, index);
               }}
               onDragEnd={() => setDraggedIndex(null)}
-              // Iniciamos el arrastre en móvil al tocar
               onTouchStart={() => setDraggedIndex(index)}
               className={`select-none touch-none ${
-                draggedIndex === index ? "bg-neutral-200/50 dark:bg-neutral-800/50 scale-[1.02] z-50 shadow-xl" : ""
+                draggedIndex === index
+                  ? "bg-neutral-200/50 dark:bg-neutral-800/50 scale-[1.02] z-50 shadow-xl"
+                  : ""
               } transition-transform duration-200`}
             >
               <Tab

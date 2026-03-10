@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
 import { db, usePosts, useUsers } from "@/hooks";
 import { PlayIcon } from "@heroicons/react/24/solid";
-import { ImagesIcon } from "lucide-react";
+import { Images } from "lucide-react";
 import MediaItem from "./MediaItem";
+import EmptyState from "../EmptyState";
 
 export default function ProfileMedia() {
   const posts = usePosts(db);
@@ -22,7 +23,7 @@ export default function ProfileMedia() {
     (post) =>
       (Array.isArray(post?.photos) && post?.photos?.length > 0) ||
       Boolean(post?.videoId) ||
-      Boolean(post?.video)
+      Boolean(post?.video),
   );
 
   // Filtramos solo los posts publicos
@@ -36,11 +37,12 @@ export default function ProfileMedia() {
       {sortedMedia?.length > 0 ? (
         sortedMedia.map((post) => <MediaItem key={post?.id} post={post} />)
       ) : (
-        <div className="size-full col-span-3 p-4 flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900">
-          <span className="text-xs md:text-sm text-neutral-400">
-            Aún no hay fotos o videos en tú perfil.
-          </span>
-        </div>
+        <EmptyState
+          Icon={Images}
+          title={"Sin archivos multimedia"}
+          caption={"Aún no hay fotos ni videos de este perfil."}
+          className="col-span-3"
+        />
       )}
     </div>
   );

@@ -5,19 +5,23 @@ import PostVideo from "./PostVideo";
 import PostLink from "./PostLink";
 import PostRepost from "./PostRepost";
 
-export default function PostContent({
-  title,
-  text,
-  caption,
-  photos,
-  videoId,
-  video,
-  link,
-  repost,
-  author,
-  premium,
-  action,
-}) {
+export default function PostContent(props) {
+  const {
+    title,
+    text,
+    caption,
+    photos,
+    videoId,
+    video,
+    link,
+    repost,
+    author,
+    premium,
+    action,
+    name,
+    username,
+  } = props;
+
   return (
     <div className="w-full flex flex-col">
       {title && <PostTitle title={title} text={text} />}
@@ -34,12 +38,15 @@ export default function PostContent({
         />
       )}
       {photos && photos?.length > 0 && (
-        <PostGallery text={text} author={author} photos={photos} />
+        <PostGallery
+          text={text}
+          photos={photos}
+          name={name}
+          username={username}
+        />
       )}
       {video && <PostVideo video={video ? video : videoId} />}
-      {link && (
-        <PostLink {...link} repost={repost} action={action} />
-      )}
+      {link && <PostLink {...link} repost={repost} action={action} />}
       {repost && <PostRepost repost={repost} author={author} />}
     </div>
   );

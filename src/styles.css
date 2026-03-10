@@ -2,12 +2,16 @@
 
 @font-face {
     font-family: "Favorit";
-    src: url(./assets/fonts/Favorit.woff2), format("woff2");
+    src: url(./fonts/Favorit.woff2), format("woff2");
+    font-weight: inherit;
+    font-style: inherit;
 }
 
 @font-face {
     font-family: "Favorit Mono";
-    src: url(./assets/fonts/FavoritMono.woff2), format("woff2");
+    src: url(./fonts/FavoritMono.woff2), format("woff2");
+    font-weight: inherit;
+    font-style: inherit;
 }
 
 @theme {
@@ -15,6 +19,15 @@
     --foreground: #0a0a0a;
     --font-sans: "Favorit", sans-serif;
     --font-mono: "Favorit Mono", monospace;
+    --font-favorit: "Favorit", sans-serif;
+    --font-favorit-mono: "Favorit Mono", sans-serif;
+    --font-google-sans: "Google Sans", sans-serif;
+    --font-google-sans-flex: "Google Sans Flex", sans-serif;
+    --font-google-sans-code: "Google Sans Code", monospace;
+    --font-space-grotesk: "Space Grotesk", sans-serif;
+    --font-outfit: "Outfit", sans-serif;
+    --font-roboto: "Roboto", sans-serif;
+    --font-inter: "Inter", sans-serif;
 }
 
 @layer utilities {
@@ -34,7 +47,7 @@
 
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    @theme {
         --background: #0a0a0a;
         --foreground: #ededed;
     }

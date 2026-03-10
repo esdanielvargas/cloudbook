@@ -14,6 +14,7 @@ import PageLine from "./PageLine";
 import PageTitle from "./PageTitle";
 import PageTabs from "./PageTabs";
 import MusicBox from "./MusicBox";
+import Post from "./Post";
 import Tab from "./Tab";
 import Range from "./Range";
 import MenuAlt from "./MenuAlt";
@@ -43,6 +44,7 @@ export {
   PageTitle,
   PageTabs,
   MusicBox,
+  Post,
   Tab,
   Range,
   SearchBar,

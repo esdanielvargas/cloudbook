@@ -43,11 +43,13 @@ export default function Feeds() {
       <PageHeader
         title="Listas"
         header={`Listas de ${currentUser?.name} (@${currentUser?.username})`}
-        Icon={ArrowUpDown}
-        iconTitle="Organizar listas"
-        iconOnClick={() => navigate("/lists/reorder")}
+        buttonRight={{
+          icon: ArrowUpDown,
+          title: "Organizar listas",
+          onClick: () => navigate("/lists/reorder"),
+        }}
       />
-      <PageBox active className="p-0! gap-0!">
+      <PageBox className="p-0! gap-0!" active>
         <Tab
           Icon={CirclePlus}
           title={"Crear nueva lista"}

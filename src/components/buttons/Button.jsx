@@ -16,7 +16,7 @@ export default function Button({
 
   const base = `${
     full ? "w-full " : ""
-  }h-9 px-2.5 md:px-4 min-w-max flex items-center justify-center gap-2 cursor-pointer rounded-lg text-sm md:text-md tracking-wide transition-all duration-300 ease-out`;
+  }h-9 px-2.5 md:px-4 min-w-max flex items-center justify-center gap-2 cursor-pointer rounded-lg text-sm md:text-md tracking-wide select-none transition-all duration-300 ease-out`;
 
   const variants = {
     default: `text-neutral-950 dark:text-neutral-50 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 ${

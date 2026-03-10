@@ -1,49 +1,65 @@
-import { Code, FileText, History } from "lucide-react";
+import { Code, Copy, FileText, History } from "lucide-react";
 import { PageBox, PageHeader, PageLine, Tab } from "../components";
+import { useThemeColor } from "@/context";
 
 export default function SettingsAbout() {
+  let { txtClass, bgTransluce20, borderTransluce } = useThemeColor();
+
   const tabs = [
-    { type: "divider" },
+    { show: true, type: "divider" },
     {
+      show: true,
       Icon: History,
       title: "Versión",
       caption: "v2.0.0 (En desarrollo)",
-      action: () =>
-        navigator.clipboard.writeText("CloudBook v2.0.0-dev") +
-        alert("¡Versión copiada al portapapeles!"),
+      secondaryAction: {
+        icon: Copy,
+        onClick: () => navigator.clipboard.writeText("CloudBook v2.0.0-dev"),
+      },
     },
     {
+      show: true,
       Icon: Code,
       title: "Código abierto",
       caption: "Ir al repositorio en GitHub.",
       href: "https://github.com/esdanielvargas/cloudbook",
     },
     {
+      show: true,
       Icon: Code,
       title: "Desarrollador",
       caption: "Diseñado y construido por @danielvargas.",
       href: "https://danielvargas.dev?utm_source=cloudbook_app&utm_medium=settings_about&utm_campaign=cloudbook&utm_content=developer_link&utm_term=danielvargas&utm_id=cloudbook_app",
     },
-    { type: "divider" },
+    { show: true, type: "divider" },
     {
+      show: true,
       Icon: FileText,
-      title: "Términos de servicio",
-      caption: "Lee nuestros términos de servicio.",
-      // href: "/legal/terms",
+      title: "Políticas",
+      caption: "Aquí encuentras todas nuestras políticas.",
+      path: "/legal",
     },
     {
+      show: true,
+      Icon: FileText,
+      title: "Términos y condiciones de uso",
+      caption: "Lee nuestros términos de servicio.",
+      path: "/legal/terms",
+    },
+    {
+      show: true,
       Icon: FileText,
       title: "Política de privacidad",
       caption: "Lee nuestra política de privacidad.",
-      // href: "/legal/privacy",
+      path: "/legal/privacy",
     },
     {
+      show: true,
       Icon: FileText,
       title: "Normas de la comunidad",
       caption: "Lee nuestras normas de la comunidad.",
-      // href: "/legal/community-guidelines",
+      path: "/legal/community-guidelines",
     },
-    { type: "divider" },
   ];
 
   return (
@@ -69,19 +85,23 @@ export default function SettingsAbout() {
             </svg>
             <div className="flex flex-col items-center justify-center gap-2">
               <h1 className="font-bold text-2xl">CloudBook</h1>
-              <span className="bg-sky-500/10 text-sky-500 px-2 py-1 rounded-full font-medium text-xs">
+              <span
+                className={`${txtClass} ${bgTransluce20} border ${borderTransluce} px-2 py-1 rounded-full font-medium text-xs`}
+              >
                 v2.0.0-dev
               </span>
             </div>
           </div>
         </div>
-        {tabs.map((tab, index) =>
-          tab.type === "divider" ? (
-            <PageLine key={index} />
-          ) : (
-            <Tab key={index} {...tab} />
-          )
-        )}
+        {tabs
+          .filter((tab) => tab.show)
+          .map((tab, index) =>
+            tab.type === "divider" ? (
+              <PageLine key={index} />
+            ) : (
+              <Tab key={index} {...tab} />
+            ),
+          )}
       </PageBox>
     </>
   );

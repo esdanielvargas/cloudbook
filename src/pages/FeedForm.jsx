@@ -11,7 +11,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { db, useFeeds, useUsers } from "@/hooks";
 import { getAuth } from "firebase/auth";
-import { Loader, X } from "lucide-react";
+import { Loader, Loader2, Trash2, X } from "lucide-react";
 import {
   Button,
   EmptyState,
@@ -35,18 +35,17 @@ export default function FeedForm() {
   const feeds = useFeeds(db);
 
   const {
+    reset,
     register,
     handleSubmit,
-    reset,
-    watch,
     formState: { errors },
   } = useForm();
 
+  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
-  const titleWatch = watch("title");
   const feedSelected = feeds?.find((feed) => feed.id === feedId);
 
   const { bgTransluce20, borderTransluce, txtClass } = useThemeColor();
@@ -121,8 +120,15 @@ export default function FeedForm() {
 
   const handleDelete = async () => {
     if (window.confirm("¿Eliminar esta lista?")) {
-      await deleteDoc(doc(db, "feeds", feedId));
-      navigate("/lists");
+      try {
+        await deleteDoc(doc(db, "feeds", feedId));
+        navigate("/lists");
+        setSaving(true);
+      } catch (error) {
+        console.error("Error al eliminar el link:", error);
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -141,87 +147,89 @@ export default function FeedForm() {
   return (
     <>
       <PageHeader
-        title={titleWatch || (isEdit ? "Editar lista" : "Nueva lista")}
+        title={isEdit ? "Editando lista" : "Nueva lista"}
+        header={`${isEdit ? "Editando lista" : "Nueva lista"} ~ CloudBook`}
+        hideUpgrade={true}
       />
-      <PageBox active>
+      <PageBox className="p-0!" active>
         <Form onSubmit={handleSubmit(onSubmit)}>
-          <FormField
-            label="Título"
-            text="Se mostrará en la navegación superior del inicio."
-            placeholder="Ej: Amigos cercanos"
-            {...register("title", { required: "Obligatorio" })}
-            error={errors.title?.message}
-          />
-          <FormField
-            label="Descripción"
-            text="¿De qué trata esta lista?"
-            textarea
-            placeholder="Opcional..."
-            {...register("caption")}
-          />
-
+          <div className="p-2.5 md:p-4 flex flex-col gap-2.5 md:gap-4">
+            <FormField
+              label="Título"
+              text="Se mostrará en la navegación superior del inicio."
+              placeholder="Ej: Amigos cercanos"
+              {...register("title", { required: "Obligatorio" })}
+              error={errors.title?.message}
+            />
+            <FormField
+              label="Descripción"
+              text="¿De qué trata esta lista?"
+              textarea
+              placeholder="Opcional..."
+              {...register("caption")}
+            />
+          </div>
           <PageLine />
-
-          {/* Chips de Usuarios */}
-          {selectedUsers && (
-            <div className="w-full mb-4">
-              <label className="text-xs text-neutral-500 mb-2 block uppercase font-bold">
-                Miembros ({selectedUsers.length})
-              </label>
-              {selectedUsers.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {selectedUsers.map((user) => (
+          <div className="p-2.5 md:p-4 flex flex-col gap-2.5 md:gap-4">
+            {/* Chips de Usuarios */}
+            {selectedUsers && (
+              <div className="w-full flex flex-col gap-2.5 md:gap-4">
+                <label className="text-xs text-neutral-500 block uppercase font-bold">
+                  Miembros ({selectedUsers.length})
+                </label>
+                {selectedUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUsers.map((user) => (
+                      <div
+                        key={user.id || user.email}
+                        className={`h-7 pl-2 pr-1 flex items-center gap-1 ${bgTransluce20} border ${borderTransluce} rounded-full ${txtClass} -text-sky-500 text-xs`}
+                      >
+                        @{user.username}
+                        <button
+                          type="button"
+                          onClick={() => toggleUser(user)}
+                          className="size-5 flex items-center justify-center cursor-pointer rounded-full transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <SearchBar
+              placeholder="Buscar usuarios para añadir..."
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {filteredUsers.length > 0 && (
+              <div className="w-full max-h-60 flex flex-col overflow-y-auto custom-scrollbar border border-neutral-200/75 dark:border-neutral-800/75">
+                {filteredUsers?.map((user) => {
+                  const isSelected = selectedUsers.some(
+                    (u) => (u.id || u.email) === (user.id || user.email),
+                  );
+                  return (
                     <div
                       key={user.id || user.email}
-                      className={`h-7 pl-2 pr-1 flex items-center gap-1 ${bgTransluce20} border ${borderTransluce} rounded-full ${txtClass} -text-sky-500 text-xs`}
+                      className="w-full py-2.5 px-3 flex items-center justify-between hover:bg-neutral-800/30 cursor-pointer transition-all"
                     >
-                      @{user.username}
-                      <button
+                      <UserCard className="p-0!" {...user} />
+                      <Button
                         type="button"
+                        variant={isSelected ? "followed" : "follow"}
                         onClick={() => toggleUser(user)}
-                        className="size-5 flex items-center justify-center cursor-pointer rounded-full transition-colors"
+                        size="sm"
                       >
-                        <X size={14} />
-                      </button>
+                        {isSelected ? "Quitar" : "Agregar"}
+                      </Button>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <SearchBar
-            placeholder="Buscar usuarios para añadir..."
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <div className="w-full flex flex-col gap-2 mt-2 max-h-60 overflow-y-auto">
-            {filteredUsers?.map((user) => {
-              const isSelected = selectedUsers.some(
-                (u) => (u.id || u.email) === (user.id || user.email),
-              );
-              return (
-                <div
-                  key={user.id || user.email}
-                  className="w-full py-2 px-3 flex items-center justify-between hover:bg-neutral-800/30 rounded-xl transition-all"
-                >
-                  <UserCard className="p-0!" {...user} />
-                  <Button
-                    type="button"
-                    variant={isSelected ? "followed" : "follow"}
-                    onClick={() => toggleUser(user)}
-                    size="sm"
-                  >
-                    {isSelected ? "Quitar" : "Agregar"}
-                  </Button>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
-
           <PageLine />
-
-          <div className="flex gap-2">
+          <div className="w-full p-2.5 md:p-4 flex items-center justify-between gap-2">
             {isEdit && (
               <Button
                 type="button"
@@ -229,7 +237,7 @@ export default function FeedForm() {
                 full
                 onClick={handleDelete}
               >
-                Eliminar
+                {saving ? "Eliminando..." : "Eliminar lista"}
               </Button>
             )}
             <Button type="submit" variant="follow" full disabled={loading}>

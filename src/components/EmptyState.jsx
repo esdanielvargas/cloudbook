@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Button } from "./buttons";
 
 export default function EmptyState({
   Icon,
@@ -6,9 +6,10 @@ export default function EmptyState({
   caption,
   path,
   actionText,
+  className = "",
 }) {
   return (
-    <div className="size-full p-6 md:p-8 flex flex-col items-center justify-center gap-3 rounded-xl bg-neutral-100/75 dark:bg-neutral-900/75 border border-neutral-200/75 dark:border-neutral-800/75">
+    <div className={`size-full p-6 md:p-8 flex flex-col items-center justify-center gap-3 rounded-xl bg-neutral-100/75 dark:bg-neutral-900/75 border border-neutral-200/75 dark:border-neutral-800/75 ${className}`}>
       {Icon && (
         <Icon
           strokeWidth={1.5}
@@ -29,12 +30,9 @@ export default function EmptyState({
       )}
 
       {path && actionText && (
-        <Link
-          to={path}
-          className="px-4 py-2 mt-2 flex items-center justify-center rounded-xl bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700 font-medium text-sm text-neutral-900 dark:text-neutral-100 transition-all duration-300 ease-out"
-        >
+        <Button to={path} variant="submit" className="mt-2">
           {actionText}
-        </Link>
+        </Button>
       )}
     </div>
   );

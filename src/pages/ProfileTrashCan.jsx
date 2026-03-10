@@ -1,8 +1,9 @@
-import { PageBox, PageHeader } from "../components";
+import { EmptyState, PageBox, PageHeader } from "../components";
 import { db, usePosts, useUsers } from "../hooks";
 import { useParams } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import Post from "../components/Post";
+import { Trash2Icon } from "lucide-react";
 
 export default function ProfileArchive() {
   const auth = getAuth();
@@ -24,7 +25,7 @@ export default function ProfileArchive() {
   // Ordenamos del más nuevo al más viejo (asumimos que hay una propiedad post.createdAt)
   const sortedPosts = [...statusPosts].sort(
     (a, b) =>
-      new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000)
+      new Date(b.posted.seconds * 1000) - new Date(a.posted.seconds * 1000),
   );
 
   // Comparamos el usuario de este perfil con el usuario logeado
@@ -34,15 +35,25 @@ export default function ProfileArchive() {
     <>
       <PageHeader title="Papelera" />
       <PageBox p="p-0">
-        {sortedPosts.map((post, index) => (
-          <Post
-            key={post.id || index}
-            {...post}
-            {...user}
-            author={isAuthor}
-            postId={post?.id}
+        {sortedPosts.length > 0 ? (
+          sortedPosts.map((post, index) => (
+            <Post
+              key={post.id || index}
+              {...post}
+              {...user}
+              author={isAuthor}
+              postId={post?.id}
+            />
+          ))
+        ) : (
+          <EmptyState
+          Icon={Trash2Icon}
+            title={"Papelera vacía"}
+            caption={
+              "Las publicaciones que elimines de tu perfil aparecerán aquí antes de ser borradas definitivamente."
+            }
           />
-        ))}
+        )}
       </PageBox>
     </>
   );

@@ -1,8 +1,8 @@
 export default function PostLink(props) {
-  const { url, image, title, description, logo, publisher } = props;
+  const { url, image, title, caption, logo, publisher } = props;
 
-  // 1. Si no hay data guardada, mostramos un enlace simple
-  if (!image && !title && !description && url) {
+  // Si no hay data guardada, mostramos un enlace simple
+  if (!image && !title && !caption && url) {
     return (
       <div className="w-full mx-2 md:mx-4">
         <a
@@ -17,10 +17,10 @@ export default function PostLink(props) {
     );
   }
 
-  // 2. Si no hay ni data ni link, no renderizamos nada
+  // Si no hay ni data ni link, no renderizamos nada
   if (!url) return null;
 
-  // 3. Renderizamos la tarjeta con la información estática
+  // Renderizamos la tarjeta con la información estática
   return (
     <div className="w-full space-y-2 md:space-y-4">
       <a
@@ -61,9 +61,9 @@ export default function PostLink(props) {
           {/* Descripción */}
           <p
             className="line-clamp-2 text-xs text-neutral-500"
-            title={description || ""}
+            title={caption || ""}
           >
-            {description || "Sin descripción disponible."}
+            {caption || "Sin descripción disponible."}
           </p>
 
           {/* Favicon + Dominio */}
@@ -71,7 +71,6 @@ export default function PostLink(props) {
             {logo && (
               <img
                 src={
-                  // Si guardaste la URL del logo, úsala, si no, usa el truco de Google
                   logo.startsWith("http")
                     ? logo
                     : `https://www.google.com/s2/favicons?domain=${url}&sz=64`

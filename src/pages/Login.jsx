@@ -7,8 +7,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { LockKeyhole, Mail } from "lucide-react";
-import { Button, FormInput } from "../components";
-import { useThemeColor } from "../context";
+import { Button, FormField } from "@/components";
+import { useThemeColor } from "@/context";
 
 export default function Login() {
   const auth = getAuth();
@@ -57,21 +57,21 @@ export default function Login() {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full flex flex-col gap-5"
       >
-        <FormInput
+        <FormField
           label="Correo electrónico"
           type="email"
-          icon={<Mail size={20} />}
+          Icon={Mail}
           placeholder="Ingresa tu correo electrónico"
           required
           {...register("email", {
             required: true,
             pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i,
           })}
-        />
-        <FormInput
+          />
+        <FormField
           label="Contraseña"
           type="password"
-          icon={<LockKeyhole size={20} />}
+          Icon={LockKeyhole}
           placeholder="Ingresa tu contrasela"
           {...register("password", { required: true, minLength: 8 })}
           required
@@ -80,7 +80,6 @@ export default function Login() {
           <Button full variant="follow" type="submit">
             Inciar sesión
           </Button>
-          {/* Divider */}
           <div className="flex items-center gap-2 my-2">
             <span className="flex-1 h-px bg-neutral-300 dark:bg-neutral-700" />
             <span className="text-xs text-neutral-500">o</span>
@@ -88,7 +87,7 @@ export default function Login() {
           </div>
 
           {/* Google Button */}
-          <Button variant="secondary" onClick={handleGoogleLogin} disabled>
+          <Button variant="secondary" className="font-google-sans-flex!" onClick={handleGoogleLogin} disabled>
             <img
               src="/images/google.svg"
               width={14}

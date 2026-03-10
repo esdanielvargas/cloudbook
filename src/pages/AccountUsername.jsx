@@ -6,11 +6,13 @@ import {
   PageBox,
   PageHeader,
   PageLine,
-} from "../components";
-import { db, useUsers } from "../hooks";
+  Tab,
+} from "@/components";
+import { db, useUsers } from "@/hooks";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { doc, Timestamp, updateDoc } from "firebase/firestore";
+import { AtSign } from "lucide-react";
 
 export default function AccountUsername() {
   const auth = getAuth();
@@ -37,7 +39,7 @@ export default function AccountUsername() {
           ...(currentUser.username_history || []),
           {
             username: data.username,
-            set_at: Timestamp.now(),
+            set_at: new Date().toISOString(),
           },
         ],
       });
@@ -51,44 +53,41 @@ export default function AccountUsername() {
   return (
     <>
       <PageHeader title="Nombre de usuario" />
-      <PageBox active>
+      <PageBox className="p-0! gap-0!" active>
         <Form onSubmit={handleSubmit(onSubmit)}>
-          <FormField
-            label="Nombre de usuario"
-            text="Elige un nombre de usuario único añadiendo letras y números. Puedes volver al nombre de usuario que tenías antes de que transcurran 14 días. Los nombres de usuario se pueden cambiar dos veces cada 14 días."
-            type="text"
-            placeholder="Nuevo nombre de usuario"
-            {...register("username")}
-            name="username"
-            prefix="@"
-          />
-          <Button full type="submit" variant="submit">
-            Guardar cambios
-          </Button>
+          <div className="w-full p-2.5 md:p-4 flex flex-col gap-2.5 md:gap-4">
+            <FormField
+              label="Nombre de usuario"
+              text="Elige un nombre de usuario único añadiendo letras y números. Puedes volver al nombre de usuario que tenías antes de que transcurran 14 días. Los nombres de usuario se pueden cambiar dos veces cada 14 días."
+              type="text"
+              placeholder="Nuevo nombre de usuario"
+              {...register("username")}
+              name="username"
+              prefix="@"
+            />
+            <Button full type="submit" variant="submit">
+              Guardar cambios
+            </Button>
+          </div>
         </Form>
         <PageLine />
         <div className="w-full">
-          <div className="w-full text-sm text-neutral-500 dark:text-neutral-400">
+          <div className="w-full py-2.5 px-2.5 md:px-4 text-sm text-neutral-500 dark:text-neutral-400">
             Historial de nombres de usuario.
           </div>
-          <div className="w-full mt-2 flex flex-col items-start justify-start gap-1">
+          <div className="w-full flex flex-col items-start justify-start gap-1">
             {currentUser?.username_history?.length > 0 ? (
               currentUser?.username_history
                 .slice()
                 .reverse()
                 .map((item, index) => (
-                  <div
+                  <Tab
                     key={index}
-                    className="w-full px-4 py-2 flex flex-col items-start justify-center rounded-md border border-neutral-800 bg-neutral-900"
-                  >
-                    <div className="w-full text-left font-normal text-md text-neutral-200">
-                      @{item?.username}
-                    </div>
-                    <div className="w-full text-left font-normal text-sm text-neutral-500 dark:text-neutral-400">
-                      {item?.set_at
-                        ? new Date(
-                            item?.set_at?.seconds * 1000
-                          ).toLocaleDateString("es", {
+                    Icon={AtSign}
+                    title={`${item?.username}`}
+                    caption={
+                      item?.set_at
+                        ? new Date(item?.set_at).toLocaleDateString("es", {
                             weekday: "short",
                             day: "2-digit",
                             month: "short",
@@ -96,9 +95,9 @@ export default function AccountUsername() {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
-                        : "Fecha desconocida"}
-                    </div>
-                  </div>
+                        : "Fecha desconocida"
+                    }
+                  />
                 ))
             ) : (
               <div className="w-full flex items-center justify-start gap-2 px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md">

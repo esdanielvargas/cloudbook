@@ -75,7 +75,7 @@ export const formatText = (text, users, premium = false) => {
         return (
           <React.Fragment key={`${index}-${subIndex}`}>
             <Link
-              to={`/search/posts?tag=${hashtag}`}
+              to={`/search/posts?q=%23${hashtag}`}
               className="hover:underline"
               style={{ color: "var(--accent-color)" }}
               title={`Ver publicaciones con el hashtag #${hashtag}`}

@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useThemeColor } from "../context";
-import { Button, FormInput } from "../components";
+import { useThemeColor } from "@/context";
+import { Button, FormField } from "@/components";
 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {
@@ -22,9 +22,10 @@ import {
   query,
   where,
   getDocs,
+  Timestamp,
 } from "firebase/firestore";
-import { db } from "../hooks";
-import { auth, storage } from "../firebase/config";
+import { db } from "@/hooks";
+import { auth, storage } from "@/firebase/config";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { v4 } from "uuid";
 
@@ -239,6 +240,13 @@ export default function Register() {
         email,
         name: displayName,
         username,
+        username_history: [
+          ...(user.username_history || []),
+          {
+            username: data.username,
+            set_at: new Date().toISOString(),
+          },
+        ],
         birthdate: date,
         bio: bio || "",
         avatar: photoURL,
@@ -279,11 +287,11 @@ export default function Register() {
         {/* --- PASO 1: Credenciales y Edad --- */}
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4">
-            <FormInput
+            <FormField
               type="email"
               label="Correo electrónico"
               placeholder="Ingresa tu correo electrónico"
-              icon={<Mail size={20} />}
+              Icon={Mail}
               autoFocus
               {...register("email", {
                 required: "Correo requerido",
@@ -292,11 +300,11 @@ export default function Register() {
               error={errors.email?.message}
               required={true}
             />
-            <FormInput
+            <FormField
               type="password"
               label="Contraseña"
               placeholder="Elige tu contraseña"
-              icon={<LockKeyhole size={20} />}
+              Icon={LockKeyhole}
               {...register("password", {
                 required: "Contraseña requerida",
                 minLength: { value: 6, message: "Mínimo 6 caracteres" },
@@ -308,11 +316,11 @@ export default function Register() {
               error={errors.password?.message}
               required={true}
             />
-            <FormInput
+            <FormField
               type="date"
               label="Fecha de nacimiento"
               placeholder="Seleccioná tu fecha de nacimiento"
-              icon={<CalendarRange size={20} />}
+              Icon={CalendarRange}
               {...register("date", {
                 required: "La fecha de nacimiento es obligatoria.",
               })}
@@ -325,9 +333,9 @@ export default function Register() {
         {/* --- PASO 2: Identidad Pública --- */}
         {step === 2 && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4">
-            <FormInput
+            <FormField
               label="Nombre visible"
-              icon={<User size={20} />}
+              Icon={User}
               autoFocus
               placeholder="Ingresa tu nombre o marca"
               {...register("displayName", {
@@ -337,9 +345,9 @@ export default function Register() {
               required={true}
             />
             <div className="relative">
-              <FormInput
+              <FormField
                 label="Nombre de usuario"
-                icon={<AtSign size={20} />}
+                Icon={AtSign}
                 placeholder="Ingresa tu nombre de usuario"
                 {...register("username", {
                   required: "El nombre de usuario es obligatorio.",
@@ -358,9 +366,9 @@ export default function Register() {
                 </span>
               )}
             </div>
-            <FormInput
+            <FormField
               label="Descripción corta"
-              icon={<FileText size={20} />}
+              Icon={FileText}
               placeholder="Escribe una breve descripción de tu perfil"
               {...register("bio", {
                 maxLength: { value: 160, message: "Máximo 160 caracteres" },

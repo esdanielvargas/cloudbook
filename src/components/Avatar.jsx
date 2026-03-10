@@ -4,6 +4,7 @@ export default function Avatar({
   avatar = "/images/avatar.png",
   name = "Display Name",
   username = "username",
+  priority,
   action = true,
   className = "",
   size = 36,
@@ -31,10 +32,11 @@ export default function Avatar({
 
   const content = (
     <img
-      src={avatar}
+      src={avatar && avatar.length > 0 ? avatar : "/images/avatar.png"}
       width={size}
       height={size}
       loading="eager"
+      fetchPriority={priority ? "high" : "auto"}
       alt={`Foto de perfil de ${name} (@${username})`}
       title={`Foto de perfil de ${name} (@${username})`}
       className="size-full object-cover object-center select-none pointer-events-none"
@@ -47,7 +49,11 @@ export default function Avatar({
 
   if (action) {
     return (
-      <Link to={url} className={`${baseClass} ${interactiveClass}`} style={commonStyle}>
+      <Link
+        to={url}
+        className={`${baseClass} ${interactiveClass}`}
+        style={commonStyle}
+      >
         {content}
       </Link>
     );

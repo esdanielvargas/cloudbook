@@ -1,4 +1,4 @@
-import { abbrNumber } from "../../utils";
+import { abbrNumber } from "@/utils";
 
 export default function Reactive({ counter = 0, active, color, children, ...props }) {
   return (
